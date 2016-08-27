@@ -1,9 +1,51 @@
-# Versatile-Analysis-of-Body-Temperature
+# Versatile Analysis of Body Temperature
 
 ## General Goals
 
-The main goal of the project is to produce a system which can process the data obtained from temperature sensors placed in a variety of animals. These data logging sensors are left in the body for relatively long periods of time (from a few days to a few years) and record the temperature of the animal every few minutes. The data produced generally follows a sinusoidal trend with a period of roughly one day. The team aims to produce software which can fit a curve to this sinusoid and produce a report using this cosinor analysis. This allows the research team to understand more about the connection of body temperature fluctuations with the health and wellbeing of an animal. The research seems to suggest that body temperature fluctuations can reliably indicate how well the animal will grow and how fit and strong it is likely to be. Beyond that the software must also provide a way to show when outliers are present as this is a strong indicator of the animal being ill, mistreated or under a range other stressors. This is so significant as many of the current methods for measuring stress levels are not as reliable as this.
+The main goal of the project is to produce a system which can process the data obtained from temperature sensors placed in a variety of animals. These data logging sensors are left in the body for relatively long periods of time (from a few days to a few years) and record the temperature of the animal every few minutes. The data produced generally follows a sinusoidal trend with a period of one day. The team aims to produce software which can fit a curve to this sinusoid and produce a report using cosinor analysis. This allows the research team to understand more about the connection of body temperature fluctuations with the health and wellbeing of an animal. The research seems to suggest that body temperature fluctuations can reliably indicate how well the animal will grow and how fit and strong it is likely to be. Beyond that the software must also provide a way to show when outliers are present as this is a strong indicator of the animal being ill, mistreated or under a range other stressors. This is so significant as many of the current methods for measuring stress levels are not as reliable as this.
 
 ## Current System
 
-The current system employed by the research group involves manually importing the data, from the CSV files produced by the data loggers, into Excel. From there the researchers use a macro to run a periodogram analysis on the data which allows for a further cosinor analysis. This system is very modular and allows for virtually any analysis to be done on the data. However, using Excel to manually complete the analysis is very time consuming and often prone to errors as each formula must manually be modified for each analysis. This means that although the analysis is very modular, changing the parameters of each analysis (such as the time) is nearly impossible. Moreover, the lack of repeatability means that any unexpected results require a recheck of the Excel formulas. The proposed system should address these problems.
+The current system employed by the research group involves manually importing the data, from the Comma Separated Values (CSV) files produced by the data loggers, into Excel. From there the researchers use a macro to run a periodogram analysis which allows for a further cosinor analysis. This system is modular and allows for virtually any calculation to be done on the data. However, using Excel to manually complete this is time consuming and often prone to errors as each formula must manually be modified each time. This means that although the analysis is modular, changing the parameters of each iteration (such as the time) is nearly impossible. Moreover, the lack of repeatability means that any unexpected results require a recheck of the Excel formulas rather than looking for potential biological factors. The proposed system should address these problems.
+
+## Proposed System
+
+### Overview
+
+The system the team aims to produce will consist of two main components, the back end analysis functionality and the front end graphical user interface (GUI). The proposed system is based around an interface that allows for easy modification and viewing of the data and analysis. Specifically, the team aims to use a package such as JFreeChart to present the data and then work with Java’s built in libraries to open windows and develop a simple series of menus to control the analysis.   
+
+The GUI system, however, relies on the backend analysis code, which runs through a series of steps. Firstly, a periodogram or Fast Fourier Transform analysis is run on the data to find the period of the curve. Using that data and the selected analysis area the cosinor analysis is done using a least squares regression and a report produced. This can then be displayed graphically via the GUI. On top of that analysis the program will be able to identify where outliers exist in the data and indicate that to the user. The analysis can then be changed and run again or more files could be imported to do further analysis on them. This means that the system is expected to be able to work with multiple files.   
+
+All in all, the program will take the inputted file (or files) in either CSV or text format, plot whatever analysis is selected and produce a report detailing the specifics of the analysis.
+
+### Functional Requirements
+
+* Reading CSV or Text Data Files   
+The system must be able to open and read CSV or Text files generated by data loggers stored on the hard­drive of the computer on which the program is being run.
+
+* Window Selection   
+The user must be able to select a range of days on which the data analysis should be run. The system will provide a mouse based slider for both the start point and the end point.
+
+* Period Calculation   
+The system must be able to calculate an accurate evaluation of the periodicity of the data provided – the time taken for the data to go through a complete oscillation from maximum to minimum and back again.
+
+* Cosinor Fit   
+The system must determine the equation of a cosine curve (Y(t)=M+A*cos(2π/𝜏*t+φ)) that matches the data as closely as possible. Given the period (𝜏), the MESOR (M), acrophase (φ) and amplitude (A) must be determined. The fitted curve should minimise the sum of the square of the residuals.
+
+* Correlation Coefficient   
+The system must report the correlation coefficient 0 ≤ r ≤ 1 based on how well the fitted cosine curve fits the data with 0 representing no correlation and 1 representing a perfect match.
+
+* Find Outliers   
+The system must locate points of the data that significantly deviate from the fitted cosine curve and determine the extent of the deviation.
+
+* Report Generation   
+The system must output a human readable file detailing the results of the analysis – period, cosinor, correlation coefficient and outliers. The user must be able to select the location to which this file is saved.
+
+* Data Plotting   
+The system must generate a plot of both the initial data and the fitted curve. The user should have control over how the plot appears – colour and scale.
+
+* Periodogram Plotting   
+The system should be able to produce a plot of the periodogram of the data – a line graph representing the prevalence of a series of frequencies on the data.
+
+* Analysing Multiple Files   
+The user should be able to select multiple CSV files and have the system run the analysis on all selected data sets and produce reports for each.
