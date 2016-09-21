@@ -1,7 +1,9 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.*;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Window extends JFrame {
 
@@ -41,9 +43,7 @@ public class Window extends JFrame {
 		JMenuItem openMenuItem = new JMenuItem("Open...",openIcon);
 		openMenuItem.setMnemonic(KeyEvent.VK_O);
 		openMenuItem.setToolTipText("Open data files");
-		openMenuItem.addActionListener((ActionEvent event) -> {
-			
-		});
+		openMenuItem.addActionListener(new OpenFileAction());
 		fileMenu.add(openMenuItem);
 		
 		//Print
@@ -99,6 +99,28 @@ public class Window extends JFrame {
 		
 		//---------------------------------------
 		setJMenuBar(menuBar);
+	}
+	
+	private class OpenFileAction extends AbstractAction {
+		
+		JPanel panel = (JPanel) getContentPane();
+		
+		@Override
+		public void actionPerformed (ActionEvent e) {
+			JFileChooser fdia = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+			fdia.addChoosableFileFilter(filter);
+			
+			int ret = fdia.showDialog(panel, "Open file");
+			if (ret == JFileChooser.APPROVE_OPTION) {
+				File file =fdia.getSelectedFile();
+				processFile(file);
+			}
+		}
+	}
+	
+	public void processFile(File file){
+		
 	}
 	
 	public static void main(String[] args) {
