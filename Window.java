@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import javax.swing.*;
@@ -78,6 +79,83 @@ public class Window extends JFrame {
 		
 		//Add file menu to menu bar
 		menuBar.add(fileMenu);
+		
+		//---------------Dataset Analysis Menu-------------
+		
+		JMenu datasetAnalysisMenu = new JMenu("Dataset Analysis");
+		
+		//Run Curve Analysis
+		ImageIcon runAnalysisIcon = new ImageIcon("run.png");
+		JMenuItem runAnalysisMenuItem = new JMenuItem("Run Curve Analysis",runAnalysisIcon);
+		runAnalysisMenuItem.setMnemonic(KeyEvent.VK_R);
+		runAnalysisMenuItem.setToolTipText("Run Curve Analysis");
+		runAnalysisMenuItem.addActionListener((ActionEvent event) -> {
+			
+		});
+		datasetAnalysisMenu.add(runAnalysisMenuItem);
+		
+		//Periodogram
+		JCheckBoxMenuItem periodogram = new JCheckBoxMenuItem("Periodogram");
+		periodogram.setMnemonic(KeyEvent.VK_P);
+		periodogram.setDisplayedMnemonicIndex(0);
+		periodogram.setSelected(true);
+		
+		periodogram.addItemListener((ItemEvent e) -> {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				
+			} else {
+				
+			}
+		});
+		datasetAnalysisMenu.add(periodogram);
+		
+		//Residuals
+		JCheckBoxMenuItem residuals = new JCheckBoxMenuItem("Residuals");
+		residuals.setMnemonic(KeyEvent.VK_R);
+		residuals.setDisplayedMnemonicIndex(0);
+		residuals.setSelected(true);
+		
+		periodogram.addItemListener((ItemEvent e) -> {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				
+			} else {
+				
+			}
+		});
+		datasetAnalysisMenu.add(residuals);
+		
+		//Curve Fitting
+		JCheckBoxMenuItem curveFitting = new JCheckBoxMenuItem("Curve Fitting");
+		curveFitting.setMnemonic(KeyEvent.VK_F);
+		curveFitting.setDisplayedMnemonicIndex(6);
+		curveFitting.setSelected(true);
+		
+		curveFitting.addItemListener((ItemEvent e) -> {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				
+			} else {
+				
+			}
+		});
+		datasetAnalysisMenu.add(curveFitting);
+		
+		//Raw Data
+		JCheckBoxMenuItem rawData = new JCheckBoxMenuItem("Raw Data");
+		rawData.setMnemonic(KeyEvent.VK_D);
+		rawData.setDisplayedMnemonicIndex(4);
+		rawData.setSelected(true);
+		
+		rawData.addItemListener((ItemEvent e) -> {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				
+			} else {
+				
+			}
+		});
+		datasetAnalysisMenu.add(rawData);
+		
+		// Add data analysis menu to menu bar
+		menuBar.add(datasetAnalysisMenu);
 		
 		//--------------------Help Menu--------------------
 		
