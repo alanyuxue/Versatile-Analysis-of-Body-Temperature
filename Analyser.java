@@ -46,6 +46,18 @@ class Analyser
 		return Cosinor.solve(times,dset.values,period);
 	}
 	
+	public double getMSR(Cosine curve)
+	{
+		int N = dset.N;
+		double sum = 0;
+		for(int i=0; i<N; i++)
+		{
+			double dif = curve.getValue(i*dset.rate)-dset.values[i];
+			sum += dif*dif;
+		}
+		return sum/N;
+	}
+	
 	public ArrayList<Integer> getOutliers(Cosine curve, double thresh)
 	{
 		int N = dset.N;
@@ -59,4 +71,51 @@ class Analyser
 		return list;
 	}
 	
+	public void printOutlierRanges(Cosine curve, double thresh)
+	{
+		ArrayList<Integer> outliers = getOutliers(curve,thresh);
+		int N = dset.N;
+		boolean[] isOutlier = new boolean[N];
+		for(int i : outliers)
+		{
+			isOutlier[i] = true;
+		}
+		int i=0;
+		int start = -1;
+		while(i < N)
+		{
+			if(isOutlier[i])
+			{
+				if(start == -1)
+					start = i;
+			}
+			else
+			{
+				if(start != -1)
+				{
+					if(start == i-1)
+					{
+						System.out.println(start);
+					}
+					else
+					{
+						System.out.println(start+"-"+(i-1));
+					}
+				}
+				start = -1;
+			}
+			i++;
+		}
+		if(start != -1)
+		{
+			if(start == i-1)
+			{
+				System.out.println(start);
+			}
+			else
+			{
+				System.out.println(start+"-"+(i-1));
+			}
+		}
+	}
 }
