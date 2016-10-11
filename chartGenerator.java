@@ -1,4 +1,4 @@
-package cits3200;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,19 +29,19 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 import org.jfree.data.time.*;
+
 public class chartGenerator extends ApplicationFrame
 {
-	public chartGenerator( String applicationTitle, String chartTitle )
+	public chartGenerator(File file)
    {
-      super(applicationTitle);
-
+      super("Temperature Analysis");
       JFreeChart xylineChart = ChartFactory.createTimeSeriesChart(
-    	         chartTitle ,
+    	         "Temperature Analysis" ,
     	         "Time" ,
     	         "Temperature" ,
-    	         createDataset() ,
+    	         createDataset(file) ,
     	         true , true , false);
-
+      
       ChartPanel chartPanel = new ChartPanel( xylineChart );
       chartPanel.setPreferredSize( new java.awt.Dimension( 1920 , 1080 ) );
 
@@ -74,10 +74,11 @@ public class chartGenerator extends ApplicationFrame
 	        return scrollBar;
 	    }
 
-   private static XYDataset createDataset(){
+   private static XYDataset createDataset(File file){
 	     final TimeSeries sheep = new TimeSeries("Sheep");
 
-	     File file = new File("data.csv");
+//	     File file = new File("data.csv");
+//	     System.out.println(file.getAbsolutePath());
 	     FileInputStream fis = null;
 	     BufferedInputStream bis = null;
 	     DataInputStream dis = null;
@@ -101,9 +102,9 @@ public class chartGenerator extends ApplicationFrame
 	       while(dis.available() != 0){
 	         String line = dis.readLine();
 	         parts = line.split(",");
-	         System.out.println("Parts is "+parts[0]+" "+parts[1]);
+//	         System.out.println("Parts is "+parts[0]+" "+parts[1]);
 	         dateTime= parts[0].split(" ");
-	         System.out.println("Date "+dateTime[0]+" Time "+dateTime[1]);
+//	         System.out.println("Date "+dateTime[0]+" Time "+dateTime[1]);
 	         dateString = dateTime[0];
 	         timeString = dateTime[1];
 	         date = dateString.split("/");
@@ -113,11 +114,11 @@ public class chartGenerator extends ApplicationFrame
 	         year = Integer.parseInt(date[2]);
 	         hour = Integer.parseInt(time[0]);
 	         minute = Integer.parseInt(time[1]);
-	         System.out.println(day);
-	         System.out.println(month);
-	         System.out.println(year);
-	         System.out.println(hour);
-	         System.out.println(minute);
+//	         System.out.println(day);
+//	         System.out.println(month);
+//	         System.out.println(year);
+//	         System.out.println(hour);
+//	         System.out.println(minute);
 	         sheep.add(new Minute(minute,hour,day,month,year),Double.parseDouble(parts[1]));
 	       }
 	       fis.close();
@@ -135,15 +136,14 @@ public class chartGenerator extends ApplicationFrame
 	     dataset.addSeries(sheep);
 	     return dataset;
    }
-   
+
+/*
    public static void main( String[ ] args )
    {
-
       chartGenerator chart = new chartGenerator("Temperature Analysis", "Temperature Analysis");
       RefineryUtilities.centerFrameOnScreen( chart );
-
       chart.setVisible( true );
-
-
    }
+*/
 }
+

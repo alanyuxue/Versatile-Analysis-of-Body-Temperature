@@ -1,66 +1,89 @@
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyEvent;
-import java.io.*;
-import javax.swing.*;
+import javax.swing.JInternalFrame;
+import javax.swing.AbstractAction;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDesktopPane;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JMenuBar;
+import javax.swing.JFrame;
+import java.awt.event.*;
+import java.io.File;
+import java.awt.*;
 
-public class Window extends JFrame {
-
-	int width;
+public class Window extends JFrame implements ActionListener 
+{
+    JDesktopPane desktop;
+    int width;
 	int height;
 	boolean fullScreen;
 	int tabs;
 	
-	public Window() {
-		width = 1000;
-		height = 500;
-		fullScreen = false;
+    public Window() {
+        super("Window");
+        width = 1280;
+		height = 720;
+		fullScreen = true;
 		tabs = 0;
 		initUI();
 	}
-	
-	private void initUI() {
-		createMenuBar();
-		
-		setTitle("Versatile Analysis of Body Temperature");
-		setSize(width,height);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-	}
-	
-	private void createMenuBar() {
-		
-		JMenuBar menuBar = new JMenuBar();
-		
+    
+    public void initUI() {
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        if (fullScreen == true) {
+        	//this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        	//this.setUndecorated(true);
+        	setBounds(0, 0,screenSize.width,screenSize.height);
+        } 
+        else {
+        	//Place the window in the middle of the screen
+        	setBounds((screenSize.width-width)/2, (screenSize.height-height)/2,width,height);
+        }
+        //Set up the GUI.
+        desktop = new JDesktopPane(); //a specialized layered pane
+//        createFrame(); //create first "window"
+        setContentPane(desktop);
+        setJMenuBar(createMenuBar());
+
+        //Make dragging a little faster but perhaps uglier.
+        desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+    }
+
+    protected JMenuBar createMenuBar() {
+    	
+        JMenuBar menuBar = new JMenuBar();
+
 		//--------------------File menu--------------------
 		
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		
 		//Open
-		ImageIcon openIcon = new ImageIcon("open.png");
-		JMenuItem openMenuItem = new JMenuItem("Open...",openIcon);
+		//ImageIcon openIcon = new ImageIcon("open.png");
+		JMenuItem openMenuItem = new JMenuItem("Open...");
 		openMenuItem.setMnemonic(KeyEvent.VK_O);
 		openMenuItem.setToolTipText("Open data files");
 		openMenuItem.addActionListener(new OpenFileAction());
 		fileMenu.add(openMenuItem);
 		
+		//Open recent
+		JMenu openRecentMenu = new JMenu("Open Recent");
+		fileMenu.add(openRecentMenu);
+		fileMenu.addSeparator();
+		
 		//Print
-		ImageIcon printIcon = new ImageIcon("print.png");
-		JMenuItem printMenuItem = new JMenuItem("Print",printIcon);
+		//ImageIcon printIcon = new ImageIcon("print.png");
+		JMenuItem printMenuItem = new JMenuItem("Print");
 		printMenuItem.setMnemonic(KeyEvent.VK_P);
 		printMenuItem.setToolTipText("Print results");
 		printMenuItem.addActionListener((ActionEvent event) -> {
 			
 		});
 		fileMenu.add(printMenuItem);
-		fileMenu.addSeparator();
-		
-		//Open recent
-		JMenu openRecentMenu = new JMenu("Open Recent");
-		fileMenu.add(openRecentMenu);
 		
 		//Export As
 		JMenu exportAsMenu = new JMenu("Export As");
@@ -68,8 +91,8 @@ public class Window extends JFrame {
 		fileMenu.addSeparator();
 		
 		//Exit
-		ImageIcon exitIcon = new ImageIcon("exit.png");
-		JMenuItem exitMenuItem = new JMenuItem("Exit",exitIcon);
+		//ImageIcon exitIcon = new ImageIcon("exit.png");
+		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
 		exitMenuItem.setToolTipText("Exit application");
 		exitMenuItem.addActionListener((ActionEvent event) -> {
@@ -85,8 +108,8 @@ public class Window extends JFrame {
 		JMenu datasetAnalysisMenu = new JMenu("Dataset Analysis");
 		
 		//Run Curve Analysis
-		ImageIcon runAnalysisIcon = new ImageIcon("run.png");
-		JMenuItem runAnalysisMenuItem = new JMenuItem("Run Curve Analysis",runAnalysisIcon);
+		//ImageIcon runAnalysisIcon = new ImageIcon("run.png");
+		JMenuItem runAnalysisMenuItem = new JMenuItem("Run Curve Analysis");
 		runAnalysisMenuItem.setMnemonic(KeyEvent.VK_R);
 		runAnalysisMenuItem.setToolTipText("Run Curve Analysis");
 		runAnalysisMenuItem.addActionListener((ActionEvent event) -> {
@@ -174,14 +197,63 @@ public class Window extends JFrame {
 		//Add help menu to the RIGHT side of menu bar
 		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(helpMenu);
-		
-		//---------------------------------------
-		setJMenuBar(menuBar);
-	}
-	
+
+        return menuBar;
+    }
+
+    //React to menu selections.
+    
+    public void actionPerformed(ActionEvent e) {
+ /*   	
+        if ("new".equals(e.getActionCommand())) { //new
+            createFrame();
+        } else { //quit
+            quit();
+        }
+ */       
+    }
+
+    //Create a new internal frame.
+    protected void createChart(File file) {
+    	
+        chartGenerator chart = new chartGenerator(file);
+        JInternalFrame internalFrame = new JInternalFrame();
+        internalFrame.setContentPane(chart.getContentPane());
+        internalFrame.pack();
+        internalFrame.setVisible(true); //necessary as of 1.3
+        desktop.add(internalFrame);
+        /*
+        try {
+            frame.setSelected(true);
+        } catch (java.beans.PropertyVetoException e) {}
+        */
+    }
+
+    //Quit the application.
+    protected void quit() {
+        System.exit(0);
+    }
+
+    /**
+     * Create the GUI and show it.  For thread safety,
+     * this method should be invoked from the
+     * event-dispatching thread.
+     */
+    private static void createAndShowGUI() {
+        //Make sure we have nice window decorations.
+        JFrame.setDefaultLookAndFeelDecorated(true);
+
+        //Create and set up the window.
+        Window frame = new Window();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Display the window.
+        frame.setVisible(true);
+    }
+    
 	private class OpenFileAction extends AbstractAction {
 		
-		JPanel panel = (JPanel) getContentPane();
+		JDesktopPane panel = (JDesktopPane) getContentPane();
 		
 		@Override
 		public void actionPerformed (ActionEvent e) {
@@ -191,21 +263,20 @@ public class Window extends JFrame {
 			
 			int ret = fdia.showDialog(panel, "Open file");
 			if (ret == JFileChooser.APPROVE_OPTION) {
+//				System.out.println("file opened");
 				File file =fdia.getSelectedFile();
-				processFile(file);
+				createChart(file);
 			}
+			else System.out.println("file cannot be opened.");
 		}
 	}
-	
-	public void processFile(File file){
-		
-	}
-	
-	public static void main(String[] args) {
-		
-		EventQueue.invokeLater(() -> {
-			Window w = new Window();
-			w.setVisible(true);
-		});
-	}
+    public static void main(String[] args) {
+        //Schedule a job for the event-dispatching thread:
+        //creating and showing this application's GUI.
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                createAndShowGUI();
+            }
+        });
+    }
 }
