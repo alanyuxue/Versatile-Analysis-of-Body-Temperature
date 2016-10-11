@@ -1,80 +1,74 @@
 package cits3200;
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.geom.Rectangle2D;
-import java.awt.*;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-
-import javax.swing.JScrollBar;
-
+import java.text.NumberFormat;
+import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.time.Minute;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.Year;
 import org.jfree.data.xy.XYDataset;
 
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
-import org.jfree.data.time.*;
-public class chartGenerator extends ApplicationFrame
-{
-	public chartGenerator( String applicationTitle, String chartTitle )
-   {
-      super(applicationTitle);
 
-      JFreeChart xylineChart = ChartFactory.createTimeSeriesChart(
-    	         chartTitle ,
-    	         "Time" ,
-    	         "Temperature" ,
-    	         createDataset() ,
-    	         true , true , false);
+public class chartGenerator {
 
-      ChartPanel chartPanel = new ChartPanel( xylineChart );
-      chartPanel.setPreferredSize( new java.awt.Dimension( 1920 , 1080 ) );
+    private static final String title = "Versatile Analysis of Body Temperature";
+    private ChartPanel chartPanel = createChart();
 
-      final XYPlot plot = xylineChart.getXYPlot( );
-
-      XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer( );
-      renderer.setSeriesPaint( 0 , Color.RED );
-      renderer.setSeriesStroke( 0 , new BasicStroke( 4.0f ) );
-      DateAxis dateAxis = (DateAxis)plot.getDomainAxis();
-      dateAxis.setDateFormatOverride(new SimpleDateFormat("DD/MM/YYYY HH:mm"));
-      dateAxis.setVerticalTickLabels(true);
-
-      plot.setRenderer( renderer );
-      plot.setDomainPannable(true);
-      this.add(chartPanel);
-      this.add(getScrollBar(dateAxis),BorderLayout.SOUTH);
-      this.pack();
-   }
-
-	private JScrollBar getScrollBar(final DateAxis domainAxis){
-	        final double r1 = domainAxis.getLowerBound();
-	        final double r2 = domainAxis.getUpperBound();
-	        JScrollBar scrollBar = new JScrollBar(JScrollBar.HORIZONTAL, 0, 100, 0, 400);
-	        scrollBar.addAdjustmentListener( new AdjustmentListener() {
-	            public void adjustmentValueChanged(AdjustmentEvent e) {
-	                double x = e.getValue() *60 *60 * 1000;
-	                domainAxis.setRange(r1+x, r2+x);
-	            }
-	        });
-	        return scrollBar;
-	    }
-
-   private static XYDataset createDataset(){
+    public chartGenerator() {
+        
+    	JFrame f = new JFrame(title);
+        f.setTitle(title);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLayout(new BorderLayout(0, 5));
+        f.add(chartPanel, BorderLayout.CENTER);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panel.add(createZoomOut());
+        panel.add(createZoomIn());
+        f.add(panel, BorderLayout.SOUTH);
+        f.pack();
+        f.setLocationRelativeTo(null);
+        f.setVisible(true);
+    }
+    
+    private ChartPanel createChart() {
+        TimeSeriesCollection roiData = createDataset();
+        
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            title, "Date", "Temperature", roiData, true, true, false);
+        
+        XYPlot plot = chart.getXYPlot();
+        plot.setDomainPannable(true);
+        plot.setRangePannable(true);
+        XYLineAndShapeRenderer renderer =
+            (XYLineAndShapeRenderer) plot.getRenderer();
+        
+        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+        return new ChartPanel(chart);
+    }
+    
+    private static TimeSeriesCollection createDataset(){
 	     final TimeSeries sheep = new TimeSeries("Sheep");
 
 	     File file = new File("data.csv");
@@ -131,19 +125,45 @@ public class chartGenerator extends ApplicationFrame
 	     catch(IOException e){
 	       e.printStackTrace();
 	     }
+	     
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection( );
 	     dataset.addSeries(sheep);
 	     return dataset;
-   }
-   
-   public static void main( String[ ] args )
-   {
+  }
+    
+    private JButton createZoomOut() {
+        final JButton auto = new JButton(new AbstractAction("Zoom Out") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	final double r1 = chartPanel.getChart().getXYPlot().getRangeAxis().getLowerBound();
+                final double r2 = chartPanel.getChart().getXYPlot().getRangeAxis().getUpperBound();
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1-5);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2+5);
+            }
+        });
+        return auto;
+    }
+    
+    private JButton createZoomIn() {
+        final JButton auto = new JButton(new AbstractAction("Zoom In") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	final double r1 = chartPanel.getChart().getXYPlot().getRangeAxis().getLowerBound();
+                final double r2 = chartPanel.getChart().getXYPlot().getRangeAxis().getUpperBound();
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1+5);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2-5);
+            }
+        });
+        return auto;
+    }
+    
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
 
-      chartGenerator chart = new chartGenerator("Temperature Analysis", "Temperature Analysis");
-      RefineryUtilities.centerFrameOnScreen( chart );
-
-      chart.setVisible( true );
-
-
-   }
+            @Override
+            public void run() {
+               chartGenerator cpd = new chartGenerator();
+            }
+        });
+    }
 }
