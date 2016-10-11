@@ -12,7 +12,7 @@ class Analyser
 	public double getPeriod()
 	{
 		int N = dset.N;
-		double[] reals = Arrays.copyOf(dset.data,N);
+		double[] reals = Arrays.copyOf(dset.values,N);
 		double[] ims = new double[N];
 		FFT.transform(reals,ims);
 		double[] result = new double[N];
@@ -43,6 +43,20 @@ class Analyser
 		double[] times = new double[N];
 		for(int i=0; i<N; i++)
 			times[i] = dset.rate*i;
-		return Cosinor.solve(times,dset.data,period);
+		return Cosinor.solve(times,dset.values,period);
 	}
+	
+	public ArrayList<Integer> getOutliers(Cosine curve, double thresh)
+	{
+		int N = dset.N;
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for(int i=0; i<N; i++)
+		{
+			double dif = Math.abs(curve.getValue(i*dset.rate)-dset.values[i]);
+			if(dif > thresh*curve.getAmplitude())
+				list.add(i);
+		}
+		return list;
+	}
+	
 }
