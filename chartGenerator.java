@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import javax.swing.JScrollBar;
 
@@ -32,6 +33,8 @@ import org.jfree.data.time.*;
 
 public class chartGenerator extends ApplicationFrame
 {
+	private static DataSet dset;
+
 	public chartGenerator(File file)
    {
       super("Temperature Analysis");
@@ -41,7 +44,7 @@ public class chartGenerator extends ApplicationFrame
     	         "Temperature" ,
     	         createDataset(file) ,
     	         true , true , false);
-      
+
       ChartPanel chartPanel = new ChartPanel( xylineChart );
       chartPanel.setPreferredSize( new java.awt.Dimension( 1920 , 1080 ) );
 
@@ -99,6 +102,13 @@ public class chartGenerator extends ApplicationFrame
 	       String[] date;
 	       String[] time;
 
+	       //initialise DataSet attributes
+	       int samplingRate;
+	       double[] data;
+	       double d;
+	       int oldHour = 0, newHour = 0 , oldMinute = 0, newMinute = 0;
+	       ArrayList<Double> datalist = new ArrayList<Double>();
+
 	       while(dis.available() != 0){
 	         String line = dis.readLine();
 	         parts = line.split(",");
@@ -119,11 +129,29 @@ public class chartGenerator extends ApplicationFrame
 //	         System.out.println(year);
 //	         System.out.println(hour);
 //	         System.out.println(minute);
-	         sheep.add(new Minute(minute,hour,day,month,year),Double.parseDouble(parts[1]));
+	         d = Double.parseDouble(parts[1]);
+	         sheep.add(new Minute(minute,hour,day,month,year),d);
+	         datalist.add(d);
+
+	         //calculate sampling rate
+	         if ( (datalist.size() & 1) == 0) {
+	        	 oldHour = hour;
+	        	 oldMinute = minute;
+	         } else {
+	        	 newHour = hour;
+	        	 newMinute = minute;
+	         }
 	       }
 	       fis.close();
 	       bis.close();
 	       dis.close();
+
+	       samplingRate = newHour * 60 + newMinute - oldHour * 60 - oldMinute;
+	       data = new double[datalist.size()];
+	       for (int i = 0; i < datalist.size(); i++) {
+	    	   data[i] = datalist.get(i).doubleValue();
+	       }
+	       dset = new DataSet(samplingRate,datalist.size(),data);
 	     }
 
 	     catch(FileNotFoundException e){
@@ -137,6 +165,9 @@ public class chartGenerator extends ApplicationFrame
 	     return dataset;
    }
 
+   public DataSet getDataSet() {
+	   return dset;
+   }
 /*
    public static void main( String[ ] args )
    {
@@ -146,4 +177,3 @@ public class chartGenerator extends ApplicationFrame
    }
 */
 }
-
