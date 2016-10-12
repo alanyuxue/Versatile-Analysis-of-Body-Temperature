@@ -37,7 +37,7 @@ public class Window extends JFrame implements ActionListener
     public void initUI() {
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        if (fullScreen == true) {
+        if (fullScreen == false) {
         	//this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         	//this.setUndecorated(true);
         	setBounds(0, 0,screenSize.width,screenSize.height);
@@ -235,23 +235,22 @@ public class Window extends JFrame implements ActionListener
     }
 
     public void processFile(File file){
-    	
-    	//analyse data
+		//analyse data
 		System.out.println("Reading file");
 		DataSet dset = new DataSet(file);
 		Analyser a = new Analyser(dset);
 		System.out.println("Performing periodogram");
-		double period = a.getPeriod();
+		double period = a.getPeriod(0,dset.N-1);
 		System.out.println("Period: "+period+" minutes");
 		System.out.println("Performing Cosinor");
-		Cosine wave = a.doCosinor(period);
+		Cosine wave = a.doCosinor(period,0,dset.N-1);
 		System.out.println("MESOR: "+wave.getMESOR());
 		System.out.println("Amplitude: "+wave.getAmplitude());
 		System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
 		double MSR = a.getMSR(wave);
 		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		System.out.println();
-
+		
 		//create chart
 		chartGenerator chart = new chartGenerator(dset);
         JInternalFrame internalFrame = new JInternalFrame();
@@ -260,6 +259,7 @@ public class Window extends JFrame implements ActionListener
         internalFrame.setVisible(true); //necessary as of 1.3
         desktop.add(internalFrame);
         RefineryUtilities.centerFrameOnScreen( chart );
+
 	}
 
     //Quit the application.

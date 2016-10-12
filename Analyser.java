@@ -9,10 +9,10 @@ class Analyser
 		dset = ds;
 	}
 	
-	public double getPeriod()
+	public double getPeriod(int start, int end)
 	{
-		int N = dset.N;
-		double[] reals = Arrays.copyOf(dset.values,N);
+		int N = end-start+1;
+		double[] reals = Arrays.copyOfRange(dset.values,start,end+1);
 		double[] ims = new double[N];
 		FFT.transform(reals,ims);
 		double[] result = new double[N];
@@ -34,16 +34,17 @@ class Analyser
 			}
 		}
 
-		return (N/maxid)*dset.rate;
+		return ((start+N)/maxid)*dset.rate;
 	}
 	
-	public Cosine doCosinor(double period)
+	public Cosine doCosinor(double period, int start, int end)
 	{
-		int N = dset.N;
+		int N = end-start+1;
+		double[] values = Arrays.copyOfRange(dset.values, start, end+1);
 		double[] times = new double[N];
 		for(int i=0; i<N; i++)
 			times[i] = dset.rate*i;
-		return Cosinor.solve(times,dset.values,period);
+		return Cosinor.solve(times,values,period);
 	}
 	
 	public double getMSR(Cosine curve)
