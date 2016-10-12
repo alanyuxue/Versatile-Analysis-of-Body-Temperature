@@ -25,6 +25,7 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.general.Dataset;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -39,13 +40,13 @@ public class chartGenerator extends ApplicationFrame {
     private ChartPanel chartPanel;
     private static DataSet dset;
 
-    public chartGenerator(File file) {
+    public chartGenerator(DataSet data) {
         super("Temperature Analysis");
     	JFrame f = new JFrame(title);
         f.setTitle(title);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setLayout(new BorderLayout(0, 5));
-        chartPanel = createChart(file);
+        chartPanel = createChart(data);
         f.add(chartPanel, BorderLayout.CENTER);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel.add(createZoomOut());
@@ -56,8 +57,8 @@ public class chartGenerator extends ApplicationFrame {
         f.setVisible(true);
     }
     
-    private ChartPanel createChart(File file) {
-        TimeSeriesCollection roiData = createDataset(file);
+    private ChartPanel createChart(DataSet data) {
+        TimeSeriesCollection roiData = createDataset(data);
         
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
             title, "Date", "Temperature", roiData, true, true, false);
@@ -72,10 +73,11 @@ public class chartGenerator extends ApplicationFrame {
         return new ChartPanel(chart);
     }
     
-    private static TimeSeriesCollection createDataset(File file){
+    private static TimeSeriesCollection createDataset(DataSet data){
 	     final TimeSeries sheep = new TimeSeries("Sheep");
-
-//	     File file = new File("data.csv");
+	     
+/*---------------------old file reading code-------------------------------------
+	     File file = new File("data.csv");
 	     FileInputStream fis = null;
 	     BufferedInputStream bis = null;
 	     DataInputStream dis = null;
@@ -118,13 +120,13 @@ public class chartGenerator extends ApplicationFrame {
 	         year = Integer.parseInt(date[2]);
 	         hour = Integer.parseInt(time[0]);
 	         minute = Integer.parseInt(time[1]);
-/*
+
 	         System.out.println(day);
 	         System.out.println(month);
 	         System.out.println(year);
 	         System.out.println(hour);
 	         System.out.println(minute);
-*/
+
 	         d = Double.parseDouble(parts[1]);
 	         sheep.add(new Minute(minute,hour,day,month,year),d);
 	         datalist.add(d);
@@ -148,6 +150,7 @@ public class chartGenerator extends ApplicationFrame {
 	       for (int i = 0; i < datalist.size(); i++) {
 	    	   data[i] = datalist.get(i).doubleValue();
 	       }
+
 	       dset = new DataSet(samplingRate,datalist.size(),data);
 	     }
 
@@ -157,7 +160,19 @@ public class chartGenerator extends ApplicationFrame {
 	     catch(IOException e){
 	       e.printStackTrace();
 	     }
-	     
+--------------------------------------------------------------------------------------*/
+
+		 //initialise DataSet attributes
+		 double d;
+		 ArrayList<Double> datalist = new ArrayList<Double>();
+		 int N = data.N;
+		 for(int i=0; i<N; i++)
+		 {
+		   d = data.values[i];
+		   sheep.addOrUpdate(new Minute(data.times[i]),d);
+		   datalist.add(d);
+		 }
+		 dset = data;
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection( );
 	     dataset.addSeries(sheep);
 	     return dataset;

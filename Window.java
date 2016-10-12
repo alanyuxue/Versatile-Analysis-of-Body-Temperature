@@ -235,20 +235,10 @@ public class Window extends JFrame implements ActionListener
     }
 
     public void processFile(File file){
-
+    	
+    	//analyse data
 		System.out.println("Reading file");
-
-		//create chart
-		chartGenerator chart = new chartGenerator(file);
-        JInternalFrame internalFrame = new JInternalFrame();
-        internalFrame.setContentPane(chart.getContentPane());
-        internalFrame.pack();
-        internalFrame.setVisible(true); //necessary as of 1.3
-        desktop.add(internalFrame);
-        RefineryUtilities.centerFrameOnScreen( chart );
-
-        //analyse data
-		DataSet dset = chart.getDataSet();
+		DataSet dset = new DataSet(file);
 		Analyser a = new Analyser(dset);
 		System.out.println("Performing periodogram");
 		double period = a.getPeriod();
@@ -258,8 +248,18 @@ public class Window extends JFrame implements ActionListener
 		System.out.println("MESOR: "+wave.getMESOR());
 		System.out.println("Amplitude: "+wave.getAmplitude());
 		System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
+		double MSR = a.getMSR(wave);
+		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		System.out.println();
 
+		//create chart
+		chartGenerator chart = new chartGenerator(dset);
+        JInternalFrame internalFrame = new JInternalFrame();
+        internalFrame.setContentPane(chart.getContentPane());
+        internalFrame.pack();
+        internalFrame.setVisible(true); //necessary as of 1.3
+        desktop.add(internalFrame);
+        RefineryUtilities.centerFrameOnScreen( chart );
 	}
 
     //Quit the application.

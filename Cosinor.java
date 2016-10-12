@@ -1,4 +1,3 @@
-
 public class Cosinor
 {
 	public static Cosine solve(double[] times, double[] values, double period)

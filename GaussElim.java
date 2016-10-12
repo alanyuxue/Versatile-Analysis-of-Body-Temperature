@@ -1,4 +1,3 @@
-
 public class GaussElim
 {
 	public static final double EP = 1e-10;

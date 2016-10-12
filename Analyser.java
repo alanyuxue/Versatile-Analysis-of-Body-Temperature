@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 class Analyser
@@ -13,7 +12,7 @@ class Analyser
 	public double getPeriod()
 	{
 		int N = dset.N;
-		double[] reals = Arrays.copyOf(dset.data,N);
+		double[] reals = Arrays.copyOf(dset.values,N);
 		double[] ims = new double[N];
 		FFT.transform(reals,ims);
 		double[] result = new double[N];
@@ -44,6 +43,79 @@ class Analyser
 		double[] times = new double[N];
 		for(int i=0; i<N; i++)
 			times[i] = dset.rate*i;
-		return Cosinor.solve(times,dset.data,period);
+		return Cosinor.solve(times,dset.values,period);
+	}
+	
+	public double getMSR(Cosine curve)
+	{
+		int N = dset.N;
+		double sum = 0;
+		for(int i=0; i<N; i++)
+		{
+			double dif = curve.getValue(i*dset.rate)-dset.values[i];
+			sum += dif*dif;
+		}
+		return sum/N;
+	}
+	
+	public ArrayList<Integer> getOutliers(Cosine curve, double thresh)
+	{
+		int N = dset.N;
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for(int i=0; i<N; i++)
+		{
+			double dif = Math.abs(curve.getValue(i*dset.rate)-dset.values[i]);
+			if(dif > thresh*curve.getAmplitude())
+				list.add(i);
+		}
+		return list;
+	}
+	
+	public void printOutlierRanges(Cosine curve, double thresh)
+	{
+		ArrayList<Integer> outliers = getOutliers(curve,thresh);
+		int N = dset.N;
+		boolean[] isOutlier = new boolean[N];
+		for(int i : outliers)
+		{
+			isOutlier[i] = true;
+		}
+		int i=0;
+		int start = -1;
+		while(i < N)
+		{
+			if(isOutlier[i])
+			{
+				if(start == -1)
+					start = i;
+			}
+			else
+			{
+				if(start != -1)
+				{
+					if(start == i-1)
+					{
+						System.out.println(start);
+					}
+					else
+					{
+						System.out.println(start+"-"+(i-1));
+					}
+				}
+				start = -1;
+			}
+			i++;
+		}
+		if(start != -1)
+		{
+			if(start == i-1)
+			{
+				System.out.println(start);
+			}
+			else
+			{
+				System.out.println(start+"-"+(i-1));
+			}
+		}
 	}
 }
