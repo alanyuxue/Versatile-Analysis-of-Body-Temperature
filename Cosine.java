@@ -1,4 +1,4 @@
-//This class represents a cosine curve of the form Y(t) = M + Acos(2pi*t/tau+phi)
+
 
 public class Cosine
 {
