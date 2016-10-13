@@ -90,7 +90,6 @@ public class chartGenerator extends ApplicationFrame {
     class MenuActionListener implements ActionListener {
   	  public void actionPerformed(ActionEvent e) {
   	    System.out.println("Selected: " + e.getActionCommand());
-
   	  }
   	}
     private void addData(ArrayList<Minute> dates ,ArrayList<Integer> values){
@@ -149,7 +148,7 @@ public class chartGenerator extends ApplicationFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_SLASH)))        
+    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH)))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -160,8 +159,7 @@ public class chartGenerator extends ApplicationFrame {
         lowerBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-            	final double r2 = chartPanel.getChart().getXYPlot().getDomainAxis().getUpperBound();
-            	final double r1 = chartPanel.getChart().getXYPlot().getDomainAxis().getLowerBound();        	
+            	final double r2 = chartPanel.getChart().getXYPlot().getDomainAxis().getUpperBound();        	
             	Date startDate = null;
             	try {
 					startDate = df.parse(lowerBound.getText());
@@ -182,7 +180,7 @@ public class chartGenerator extends ApplicationFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_SLASH)))        
+    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH)))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -193,7 +191,7 @@ public class chartGenerator extends ApplicationFrame {
     	upperBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-            	final double r2 = chartPanel.getChart().getXYPlot().getDomainAxis().getUpperBound();
+
             	final double r1 = chartPanel.getChart().getXYPlot().getDomainAxis().getLowerBound();        	
             	Date startDate = null;
             	try {
