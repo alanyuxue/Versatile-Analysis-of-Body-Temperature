@@ -166,7 +166,14 @@ public class chartGenerator extends ApplicationFrame {
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}
-    			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) startDate.getTime(),r2);
+            	if((double) startDate.getTime() > r2){
+            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) startDate.getTime(),r2);
+				}
+            	else{
+            		JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
+            	}
+    			
+    			lowerBound.setText("");
             }
         });
         return lowerBound;
@@ -196,10 +203,17 @@ public class chartGenerator extends ApplicationFrame {
             	Date startDate = null;
             	try {
 					startDate = df.parse(upperBound.getText());
+					
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}            	
-    			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(r1,(double) startDate.getTime());
+            	if((double) startDate.getTime() > r1){
+            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(r1,(double) startDate.getTime());
+				}
+            	else{
+            		JOptionPane.showMessageDialog(null, "Upper bound is lower than lower bound");
+            	}
+    			upperBound.setText("");
             }
         });
         return upperBound;
