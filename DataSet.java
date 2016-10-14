@@ -4,10 +4,14 @@ import java.text.SimpleDateFormat;
 
 class DataSet
 {
+	public String path;
+	public String name;
 	public int rate; //Sampling rate in minutes
 	public int N; //number of data points
 	public Date[] times;
 	public double[] values;
+	public Date startDate;
+	public Date endDate;
 	
 	public DataSet(File datafile)
 	{
@@ -15,6 +19,8 @@ class DataSet
 		{
 			Scanner s = new Scanner(datafile);
 			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+			path = datafile.getPath();
+			name = datafile.getName();
 			//Read lines
 			ArrayList<String> lines = new ArrayList<String>();
 			while(s.hasNextLine())
@@ -41,7 +47,8 @@ class DataSet
 			}
 			//Get sampling rate based off first 2 entries
 			rate = (int) ((times[1].getTime()-times[0].getTime())/(1000*60));
-			System.out.println("Rate: " +rate+" minutes between each sample");
+			startDate = times[0];
+			endDate = times[N-1];
 		}
 		catch (FileNotFoundException e)
 		{

@@ -18,6 +18,10 @@ public class Cosine
 	{
 		return M+A*Math.cos(2*Math.PI*t/tau+phi);
 	}
+	public double getPeriod()
+	{
+		return tau;
+	}
 	public double getMESOR()
 	{
 		return M;
@@ -28,7 +32,10 @@ public class Cosine
 	}
 	public double getAcrophase()
 	{
-		return -phi*tau/(2*Math.PI);
+		double aphase = -phi*tau/(2*Math.PI);
+		while(aphase < 0)
+			aphase += tau;
+		return aphase;
 	}
 	public String toString()
 	{

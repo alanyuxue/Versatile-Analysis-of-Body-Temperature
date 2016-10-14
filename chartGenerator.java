@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -30,7 +32,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.xml.crypto.Data;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -52,19 +56,18 @@ public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
-    
+    private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     
-    public chartGenerator(DataSet dset) {
+    public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
     			true, 	//resizable
     			true,	//closable
     			true,	//maximisable
     			true);	//iconifiable
-    	
+    	dset = ds;
     	chartPanel = createChart(dset);
-
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -73,16 +76,43 @@ public class chartGenerator extends JInternalFrame {
         panel.add(lowerBound());
         panel.add(upperBound());
         add(panel, BorderLayout.SOUTH);
+        add(createResultPanel(dset),BorderLayout.EAST);
         pack();
         setVisible(true);
         setLocation(xOffset*openChartCount,yOffset*openChartCount);
+    }
+    
+    private JPanel createResultPanel(DataSet dset) {
+    	JPanel result = new JPanel();
+    	result.setLayout(new BoxLayout(result, BoxLayout.PAGE_AXIS));
+    	Analyser a = new Analyser(dset);
+		double p = a.getPeriod(0,dset.N-1);
+    	Cosine wave = a.doCosinor(p,0,dset.N-1);
+		double MSR = a.getMSR(wave);
+
+		JLabel rate = new JLabel("Rate: "+ dset.rate+ " minutes between each sample");
+    	JLabel period = new JLabel("Period: "+ p+ " minutes");
+    	JLabel mesor = new JLabel("MESOR: "+wave.getMESOR());
+    	JLabel amplitude = new JLabel("Amplitude: "+wave.getAmplitude());
+    	JLabel acrophase = new JLabel("Acrophase: "+wave.getAcrophase()+" minutes");
+		JLabel msr1 = new JLabel("Mean Square Residual: "+MSR+"  ");
+		JLabel msr2 = new JLabel("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		result.add(rate);
+    	result.add(period);
+    	result.add(mesor);
+    	result.add(amplitude);
+    	result.add(acrophase);
+    	result.add(msr1);
+    	result.add(msr2);
+    	
+    	return result;
     }
     
     private ChartPanel createChart(DataSet dset) {
         roiData = createDataset(dset);
         
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-        		"Temperature Analysis #" + (openChartCount), "Date", "Temperature", roiData, true, true, false);
+        		"Temperature Analysis #" + openChartCount, "Date", "Temperature", roiData, true, true, false);
         
         XYPlot plot = chart.getXYPlot();
         plot.setDomainPannable(true);
@@ -98,21 +128,23 @@ public class chartGenerator extends JInternalFrame {
   	    System.out.println("Selected: " + e.getActionCommand());
   	  }
   	}
-    private void addData(ArrayList<Minute> dates ,ArrayList<Integer> values){
+    private void addData(ArrayList<Date> dates ,ArrayList<Integer> values){
     	final TimeSeries analysis = new TimeSeries("Analysis");
-    	
+    	int length = dates.size();
+    	for(int i = 0;i<length;i++){
+    		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
+    	}
     	roiData.addSeries(analysis);
     }
+    
     private static TimeSeriesCollection createDataset(DataSet dset){
-	     final TimeSeries series = new TimeSeries("Series");
+	     final TimeSeries series = new TimeSeries(dset.name);
 		 double d;
-		 ArrayList<Double> datalist = new ArrayList<Double>();
 		 int N = dset.N;
 		 for(int i=0; i<N; i++)
 		 {
 		   d = dset.values[i];
 		   series.addOrUpdate(new Minute(dset.times[i]),d);
-		   datalist.add(d);
 		 }
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection( );
 	     dataset.addSeries(series);
@@ -172,7 +204,7 @@ public class chartGenerator extends JInternalFrame {
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}
-            	if((double) startDate.getTime() > r2){
+            	if(startDate.before(dset.times[dset.N-1])){
             		chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) startDate.getTime(),r2);
 				}
             	else{
@@ -184,6 +216,7 @@ public class chartGenerator extends JInternalFrame {
         });
         return lowerBound;
     }
+    
     private JFormattedTextField upperBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
@@ -213,7 +246,7 @@ public class chartGenerator extends JInternalFrame {
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}            	
-            	if((double) startDate.getTime() > r1){
+            	if(startDate.after(dset.times[0])){
             		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(r1,(double) startDate.getTime());
 				}
             	else{

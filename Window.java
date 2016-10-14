@@ -235,10 +235,11 @@ public class Window extends JFrame implements ActionListener
     }
 
     public void processFile(File file){
-    	
+  	
     	//process data
-		System.out.println("Reading file");
+//		System.out.println("Reading file");
 		DataSet dset = new DataSet(file);
+/*
 		Analyser a = new Analyser(dset);
 		System.out.println("Performing periodogram");
 		double period = a.getPeriod();
@@ -251,7 +252,7 @@ public class Window extends JFrame implements ActionListener
 		double MSR = a.getMSR(wave);
 		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		System.out.println();
-
+*/
 		//create chart
 		chartGenerator chart = new chartGenerator(dset);
 
