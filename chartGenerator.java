@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -59,6 +60,7 @@ public class chartGenerator extends JInternalFrame {
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
+    ResultPanel result = new ResultPanel();
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -75,38 +77,15 @@ public class chartGenerator extends JInternalFrame {
         panel.add(createZoomIn());
         panel.add(lowerBound());
         panel.add(upperBound());
+        panel.add(analyse());
         add(panel, BorderLayout.SOUTH);
-        add(createResultPanel(dset),BorderLayout.EAST);
+        add(result,BorderLayout.EAST);
         pack();
         setVisible(true);
         setLocation(xOffset*openChartCount,yOffset*openChartCount);
     }
     
-    private JPanel createResultPanel(DataSet dset) {
-    	JPanel result = new JPanel();
-    	result.setLayout(new BoxLayout(result, BoxLayout.PAGE_AXIS));
-    	Analyser a = new Analyser(dset);
-		double p = a.getPeriod(0,dset.N-1);
-    	Cosine wave = a.doCosinor(p,0,dset.N-1);
-		double MSR = a.getMSR(wave);
-
-		JLabel rate = new JLabel("Rate: "+ dset.rate+ " minutes between each sample");
-    	JLabel period = new JLabel("Period: "+ p+ " minutes");
-    	JLabel mesor = new JLabel("MESOR: "+wave.getMESOR());
-    	JLabel amplitude = new JLabel("Amplitude: "+wave.getAmplitude());
-    	JLabel acrophase = new JLabel("Acrophase: "+wave.getAcrophase()+" minutes");
-		JLabel msr1 = new JLabel("Mean Square Residual: "+MSR+"  ");
-		JLabel msr2 = new JLabel("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		result.add(rate);
-    	result.add(period);
-    	result.add(mesor);
-    	result.add(amplitude);
-    	result.add(acrophase);
-    	result.add(msr1);
-    	result.add(msr2);
-    	
-    	return result;
-    }
+    
     
     private ChartPanel createChart(DataSet dset) {
         roiData = createDataset(dset);
@@ -175,6 +154,28 @@ public class chartGenerator extends JInternalFrame {
             }
         });
         return auto;
+    }
+    
+    private JButton analyse() {
+    	JButton analyse = new JButton(new AbstractAction("Analyse") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Analyser a = new Analyser(dset);
+				double p = a.getPeriod(0,dset.N-1);
+		    	Cosine wave = a.doCosinor(p,0,dset.N-1);
+				double MSR = a.getMSR(wave);
+				
+				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
+		    	result.period.setText("Period: "+ p+ " minutes");
+		    	result.mesor.setText("MESOR: "+wave.getMESOR());
+		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
+		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
+		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
+		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+			}
+		});
+    	return analyse;
     }
     
     private JFormattedTextField lowerBound() {
@@ -256,5 +257,30 @@ public class chartGenerator extends JInternalFrame {
             }
         });
         return upperBound;
+    }
+    
+    private class ResultPanel extends JPanel{
+    	
+    	JLabel rate = new JLabel();
+    	JLabel period = new JLabel();
+    	JLabel mesor = new JLabel();
+    	JLabel amplitude = new JLabel();
+    	JLabel acrophase = new JLabel();
+		JLabel msr1 = new JLabel();
+		JLabel msr2 = new JLabel();
+		
+    	private ResultPanel() {
+        	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        	
+        	JLabel title = new JLabel("Analyse Result                                ");
+        	add(title);
+        	add(rate);
+	    	add(period);
+	    	add(mesor);
+	    	add(amplitude);
+	    	add(acrophase);
+	    	add(msr1);
+	    	add(msr2);
+    	}
     }
 }
