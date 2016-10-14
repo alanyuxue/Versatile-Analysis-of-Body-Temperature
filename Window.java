@@ -241,14 +241,15 @@ public class Window extends JFrame implements ActionListener
 		Analyser a = new Analyser(dset);
 		System.out.println("Performing periodogram");
 		double period = a.getPeriod(0,dset.N-1);
-		System.out.println("Period: "+period+" minutes");
+		//System.out.println("Period: "+period+" minutes");
 		System.out.println("Performing Cosinor");
 		Cosine wave = a.doCosinor(period,0,dset.N-1);
-		System.out.println("MESOR: "+wave.getMESOR());
-		System.out.println("Amplitude: "+wave.getAmplitude());
-		System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
+		//System.out.println("MESOR: "+wave.getMESOR());
+		//System.out.println("Amplitude: "+wave.getAmplitude());
+		//System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
 		double MSR = a.getMSR(wave);
-		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		//System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		System.out.println("Created report: "+a.createReport(wave));
 		System.out.println();
 		
 		//create chart

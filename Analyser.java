@@ -1,4 +1,6 @@
+import java.io.*;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 class Analyser
 {
@@ -59,11 +61,10 @@ class Analyser
 		return sum/N;
 	}
 	
-	public ArrayList<Integer> getOutliers(Cosine curve, double thresh)
+	public ArrayList<Integer> getOutliers(int start, int end, Cosine curve, double thresh)
 	{
-		int N = dset.N;
 		ArrayList<Integer> list = new ArrayList<Integer>();
-		for(int i=0; i<N; i++)
+		for(int i=start; i<=end; i++)
 		{
 			double dif = Math.abs(curve.getValue(i*dset.rate)-dset.values[i]);
 			if(dif > thresh*curve.getAmplitude())
@@ -72,51 +73,95 @@ class Analyser
 		return list;
 	}
 	
-	public void printOutlierRanges(Cosine curve, double thresh)
+	public ArrayList<String> outlierRanges(int start, int end, Cosine curve, double thresh)
 	{
-		ArrayList<Integer> outliers = getOutliers(curve,thresh);
-		int N = dset.N;
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		ArrayList<String> strs = new ArrayList<String>();
+		ArrayList<Integer> outliers = getOutliers(start,end,curve,thresh);
+		int N = end-start+1;
 		boolean[] isOutlier = new boolean[N];
 		for(int i : outliers)
 		{
 			isOutlier[i] = true;
 		}
-		int i=0;
-		int start = -1;
-		while(i < N)
+		int i=start;
+		int rstart = -1;
+		while(i <= end)
 		{
-			if(isOutlier[i])
+			if(isOutlier[i-start])
 			{
-				if(start == -1)
-					start = i;
+				if(rstart == -1)
+					rstart = i;
 			}
 			else
 			{
-				if(start != -1)
+				if(rstart != -1)
 				{
-					if(start == i-1)
-					{
-						System.out.println(start);
-					}
+					if(rstart == i-1)
+						strs.add(format.format(indexToDate(rstart)));
 					else
-					{
-						System.out.println(start+"-"+(i-1));
-					}
+						strs.add(format.format(indexToDate(rstart))+"-"+format.format(indexToDate(i-1)));
 				}
-				start = -1;
+				rstart = -1;
 			}
 			i++;
 		}
-		if(start != -1)
+		if(rstart != -1)
 		{
-			if(start == i-1)
-			{
-				System.out.println(start);
-			}
+			if(rstart == i-1)
+				strs.add(format.format(indexToDate(rstart)));
 			else
+				strs.add(format.format(indexToDate(rstart))+"-"+format.format(indexToDate(i-1)));
+		}
+		rstart = -1;
+		return strs;
+	}
+	
+	public Date indexToDate(int i)
+	{
+		//return new Date(dset.times[0].getTime()+i*dset.rate*60*1000);
+		 Calendar cal = Calendar.getInstance();
+		 cal.setTime(dset.times[0]);
+		 cal.add(Calendar.MINUTE, i*dset.rate);
+		 return cal.getTime();
+	}
+	
+	public int DateToIndex(Date d)
+	{
+		return (int) (d.getTime()-dset.times[0].getTime())/dset.rate;
+	}
+	
+	public ArrayList<String> reportStrings(Cosine wave)
+	{
+		ArrayList<String> str = new ArrayList<String>();
+		str.add("Results for "+dset.name);
+		str.add("Period: "+wave.getPeriod()+" minutes ("+(wave.getPeriod()/60)+" hours)");
+		str.add("MESOR: "+wave.getMESOR());
+		str.add("Amplitude: "+wave.getAmplitude());
+		str.add("Acrophase: "+wave.getAcrophase()+" minutes");
+		ArrayList<String> outliers = outlierRanges(0,dset.N-1,wave,3);
+		str.add("Outliers: ");
+		for(String s : outliers)
+			str.add(s);
+		return str;
+	}
+	
+	public boolean createReport(Cosine wave)
+	{
+		try
+		{
+			PrintWriter writer = new PrintWriter(dset.path+" - REPORT.txt", "UTF-8");
+			ArrayList<String> lines = reportStrings(wave);
+			for(String str : lines)
 			{
-				System.out.println(start+"-"+(i-1));
+				writer.println(str);
 			}
+			writer.close();
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
 		}
 	}
 }

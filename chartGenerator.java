@@ -80,20 +80,18 @@ public class chartGenerator extends ApplicationFrame
 	    }
 
    private static XYDataset createDataset(DataSet data){
-	     final TimeSeries sheep = new TimeSeries("Sheep");
+	     final TimeSeries series = new TimeSeries(data.name);
 		   //initialise DataSet attributes
 		   double d;
-		   ArrayList<Double> datalist = new ArrayList<Double>();
 		   int N = data.N;
 		   for(int i=0; i<N; i++)
 		   {
 		     d = data.values[i];
-		     sheep.addOrUpdate(new Minute(data.times[i]),d);
-		     datalist.add(d);
+		     series.addOrUpdate(new Minute(data.times[i]),d);
 		   }
 		   dset = data;
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection();
-	     dataset.addSeries(sheep);
+	     dataset.addSeries(series);
 	     return dataset;
    }
 
