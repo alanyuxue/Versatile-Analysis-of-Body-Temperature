@@ -1,4 +1,5 @@
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -21,9 +22,9 @@ public class Window extends JFrame implements ActionListener
 {
     JDesktopPane desktop;
     int width;
-	  int height;
+	int height;
     boolean fullScreen;
-	  int tabs;
+    int tabs;
 
     public Window() {
         super("Window");
@@ -37,12 +38,11 @@ public class Window extends JFrame implements ActionListener
     public void initUI() {
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        if (fullScreen == false) {
+        if (fullScreen == true) {
         	//this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         	//this.setUndecorated(true);
         	setBounds(0, 0,screenSize.width,screenSize.height);
-        }
-        else {
+        } else {
         	//Place the window in the middle of the screen
         	setBounds((screenSize.width-width)/2, (screenSize.height-height)/2,width,height);
         }
@@ -54,7 +54,7 @@ public class Window extends JFrame implements ActionListener
         //Make dragging a little faster but perhaps uglier.
         desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
     }
-
+  
     protected JMenuBar createMenuBar() {
 
         JMenuBar menuBar = new JMenuBar();
@@ -235,31 +235,34 @@ public class Window extends JFrame implements ActionListener
     }
 
     public void processFile(File file){
-		//analyse data
-		System.out.println("Reading file");
+  	
+    	//process data
+//		System.out.println("Reading file");
 		DataSet dset = new DataSet(file);
+/*
 		Analyser a = new Analyser(dset);
 		System.out.println("Performing periodogram");
-		double period = a.getPeriod(0,dset.N-1);
-		//System.out.println("Period: "+period+" minutes");
+		double period = a.getPeriod();
+		System.out.println("Period: "+period+" minutes");
 		System.out.println("Performing Cosinor");
-		Cosine wave = a.doCosinor(period,0,dset.N-1);
-		//System.out.println("MESOR: "+wave.getMESOR());
-		//System.out.println("Amplitude: "+wave.getAmplitude());
-		//System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
+		Cosine wave = a.doCosinor(period);
+		System.out.println("MESOR: "+wave.getMESOR());
+		System.out.println("Amplitude: "+wave.getAmplitude());
+		System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
 		double MSR = a.getMSR(wave);
-		//System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		System.out.println("Created report: "+a.createReport(wave));
+		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		System.out.println();
-		
+*/
 		//create chart
 		chartGenerator chart = new chartGenerator(dset);
-        JInternalFrame internalFrame = new JInternalFrame();
-        internalFrame.setContentPane(chart.getContentPane());
-        internalFrame.pack();
-        internalFrame.setVisible(true); //necessary as of 1.3
-        desktop.add(internalFrame);
-        RefineryUtilities.centerFrameOnScreen( chart );
+
+		chart.setVisible(true);
+        desktop.add(chart);
+        
+        //always put new chart on top of others
+        try {
+            chart.setSelected(true);
+        } catch (java.beans.PropertyVetoException e) {}
 
 	}
 
