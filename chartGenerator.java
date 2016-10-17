@@ -74,21 +74,15 @@ public class chartGenerator extends JInternalFrame {
     	dset = ds;
     	start = dset.startDate;
     	end = dset.endDate;
+
     	chartPanel = createChart(dset);
     	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(createZoomOut());
         panel.add(createZoomIn());
         
-        JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
-        JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
-        panel.add(lowerLabel);
-        panel.add(lowerBound());
-        panel.add(upperLabel);
-        panel.add(upperBound());
-        panel.add(analyse());
         add(panel, BorderLayout.SOUTH);
         add(result,BorderLayout.EAST);
         pack();
@@ -171,34 +165,12 @@ public class chartGenerator extends JInternalFrame {
         return auto;
     }
     
-    private JButton analyse() {
-    	JButton analyse = new JButton(new AbstractAction("Analyse") {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Analyser a = new Analyser(dset);
-				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
-		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
-				double MSR = a.getMSR(wave);
-				
-				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
-		    	result.period.setText("Period: "+ p+ " minutes");
-		    	result.mesor.setText("MESOR: "+wave.getMESOR());
-		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
-		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
-		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
-		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
-			}
-		});
-    	return analyse;
-    }
-    
 	private JFormattedTextField lowerBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     	JFormattedTextField lowerBound = new JFormattedTextField(df);
     	lowerBound.setColumns(16);
-    	lowerBound.setValue(start);
+    	lowerBound.setMaximumSize(new Dimension(300,30));
+//    	lowerBound.setText(df.format(start));
     	lowerBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
@@ -237,11 +209,12 @@ public class chartGenerator extends JInternalFrame {
         return lowerBound;
     }
     
-    private JFormattedTextField upperBound() {
+	private JFormattedTextField upperBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
     	upperBound.setColumns(10);
-    	upperBound.setValue(end);
+    	upperBound.setMaximumSize(new Dimension(300,30));
+//    	upperBound.setText(df.format(end));
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
@@ -280,6 +253,64 @@ public class chartGenerator extends JInternalFrame {
         return upperBound;
     }
     
+	private JTextField outlierTextField() {
+		JTextField outlierTextField = new JTextField();
+		outlierTextField.setMaximumSize(new Dimension(300,30));
+		outlierTextField.setText("0.0");
+		double outlier;
+		try {
+			outlier = Double.parseDouble(outlierTextField.getText());
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Please enter a double number");
+		}
+		
+		outlierTextField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		
+		return outlierTextField;
+	}
+	
+    private JButton analyse() {
+    	JButton analyse = new JButton(new AbstractAction("Analyse") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Analyser a = new Analyser(dset);
+				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
+		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
+				double MSR = a.getMSR(wave);
+				
+				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
+		    	result.period.setText("Period: "+ p+ " minutes");
+		    	result.mesor.setText("MESOR: "+wave.getMESOR());
+		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
+		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
+		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
+		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
+			}
+		});
+    	return analyse;
+    }
+    
+	private JButton produceReport() {
+		JButton produceReport = new JButton(new AbstractAction("Produce Report") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		return produceReport;
+	}
+	
     private class ResultPanel extends JPanel{
     	
     	JLabel rate = new JLabel();
@@ -293,7 +324,19 @@ public class chartGenerator extends JInternalFrame {
     	private ResultPanel() {
         	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         	
-        	JLabel title = new JLabel("Analyse Result                                ");
+        	JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
+            JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
+            JLabel outlierLabel = new JLabel("Outlier Sensitivity:");
+            add(lowerLabel);
+            add(lowerBound());
+            add(upperLabel);
+            add(upperBound());
+            add(outlierLabel);
+            add(outlierTextField());
+            add(analyse());
+            add(produceReport());
+            
+        	JLabel title = new JLabel("Results:");
         	add(title);
         	add(rate);
 	    	add(period);
