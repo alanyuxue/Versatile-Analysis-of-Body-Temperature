@@ -43,6 +43,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Day;
@@ -75,6 +76,7 @@ public class chartGenerator extends JInternalFrame {
     	start = dset.startDate;
     	end = dset.endDate;
     	chartPanel = createChart(dset);
+    	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -121,6 +123,7 @@ public class chartGenerator extends JInternalFrame {
     	for(int i = 0;i<length;i++){
     		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
     	}
+    	
     	roiData.addSeries(analysis);
     }
     
