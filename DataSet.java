@@ -49,6 +49,7 @@ class DataSet
 			rate = (int) ((times[1].getTime()-times[0].getTime())/(1000*60));
 			startDate = times[0];
 			endDate = times[N-1];
+			s.close();
 		}
 		catch (FileNotFoundException e)
 		{

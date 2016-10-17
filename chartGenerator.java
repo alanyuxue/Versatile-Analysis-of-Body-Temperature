@@ -19,7 +19,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -107,7 +106,7 @@ public class chartGenerator extends JInternalFrame {
   	    System.out.println("Selected: " + e.getActionCommand());
   	  }
   	}
-    private void addData(ArrayList<Date> dates ,ArrayList<Integer> values){
+    private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
     	final TimeSeries analysis = new TimeSeries("Analysis");
     	int length = dates.size();
     	for(int i = 0;i<length;i++){
@@ -173,6 +172,7 @@ public class chartGenerator extends JInternalFrame {
 		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		    	addData(a.fittedDates(),a.fittedValues(wave));
 			}
 		});
     	return analyse;
