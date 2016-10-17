@@ -169,11 +169,11 @@ class Analyser
 		return wave.getValue((d.getTime()-dset.startDate.getTime())/(60*1000));
 	}
 	
-	public ArrayList<Date> fittedDates()
+	public ArrayList<Date> fittedDates(Date s, Date e)
 	{
 		ArrayList<Date> dates = new ArrayList<Date>();
-		int i = dateToIndex(dset.startDate);
-		int j = dateToIndex(dset.endDate);
+		int i = dateToIndex(s);
+		int j = dateToIndex(e);
 		for(int k=i; k<=j; k++)
 		{
 			dates.add(dset.times[k]);
@@ -181,11 +181,11 @@ class Analyser
 		return dates;
 	}
 	
-	public ArrayList<Double> fittedValues(Cosine wave)
+	public ArrayList<Double> fittedValues(Date s, Date e,Cosine wave)
 	{
 		ArrayList<Double> values = new ArrayList<Double>();
-		int i = dateToIndex(dset.startDate);
-		int j = dateToIndex(dset.endDate);
+		int i = dateToIndex(s);
+		int j = dateToIndex(e);
 		for(int k=i; k<=j; k++)
 		{
 			values.add(getValueFromDate(dset.times[k],wave));

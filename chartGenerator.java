@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -55,11 +56,12 @@ import org.jfree.ui.ApplicationFrame;
 public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
-    private TimeSeriesCollection roiData = new TimeSeriesCollection();
+    private TimeSeriesCollection roiData = new TimeSeriesCollection( );
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
+    static Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -68,6 +70,8 @@ public class chartGenerator extends JInternalFrame {
     			true,	//maximisable
     			true);	//iconifiable
     	dset = ds;
+    	start = dset.startDate;
+    	end = dset.endDate;
     	chartPanel = createChart(dset);
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
@@ -161,8 +165,8 @@ public class chartGenerator extends JInternalFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Analyser a = new Analyser(dset);
-				double p = a.getPeriod(0,dset.N-1);
-		    	Cosine wave = a.doCosinor(p,0,dset.N-1);
+				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
+		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
 				
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
@@ -172,22 +176,23 @@ public class chartGenerator extends JInternalFrame {
 		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		    	addData(a.fittedDates(),a.fittedValues(wave));
+		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
 			}
 		});
     	return analyse;
     }
     
-    private JFormattedTextField lowerBound() {
-    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	private JFormattedTextField lowerBound() {
+    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     	JFormattedTextField lowerBound = new JFormattedTextField(df);
-    	lowerBound.setColumns(10);
+    	lowerBound.setColumns(16);
+    	lowerBound.setValue(start);
     	lowerBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH)))        
+    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -198,36 +203,35 @@ public class chartGenerator extends JInternalFrame {
         lowerBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-            	final double r2 = chartPanel.getChart().getXYPlot().getDomainAxis().getUpperBound();        	
-            	Date startDate = null;
             	try {
-					startDate = df.parse(lowerBound.getText());
+					start = df.parse(lowerBound.getText());
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}
-            	if(startDate.before(dset.times[dset.N-1])){
-            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) startDate.getTime(),r2);
+            	if(start.after(dset.startDate) && start.before(dset.endDate)){
+            		if (start.before(end)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.startDate = start;
+            		}
+            		else JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
 				}
-            	else{
-            		JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
-            	}
-    			
-    			lowerBound.setText("");
+            	else JOptionPane.showMessageDialog(null, "Lower Bound is outside date range");
             }
         });
         return lowerBound;
     }
     
     private JFormattedTextField upperBound() {
-    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
-    	upperBound.setColumns(10);
+    	upperBound.setColumns(16);
+    	upperBound.setValue(end);
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH)))        
+    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -239,21 +243,20 @@ public class chartGenerator extends JInternalFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-            	final double r1 = chartPanel.getChart().getXYPlot().getDomainAxis().getLowerBound();        	
-            	Date startDate = null;
             	try {
-					startDate = df.parse(upperBound.getText());
+					end = df.parse(upperBound.getText());
 					
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}            	
-            	if(startDate.after(dset.times[0])){
-            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(r1,(double) startDate.getTime());
+            	if(end.after(dset.startDate) && end.before(dset.endDate)){
+            		if (end.after(start)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.endDate = end;
+            		}
+            		else JOptionPane.showMessageDialog(null, "Upper Bound is Lower than Lower Bound");
 				}
-            	else{
-            		JOptionPane.showMessageDialog(null, "Upper bound is lower than lower bound");
-            	}
-    			upperBound.setText("");
+            	else JOptionPane.showMessageDialog(null, "Upper Bound is outside date range");
             }
         });
         return upperBound;
