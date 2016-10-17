@@ -127,7 +127,7 @@ class Analyser
 	
 	public int dateToIndex(Date d)
 	{
-		return (int) (d.getTime()-dset.times[0].getTime())/dset.rate;
+		return (int) ((d.getTime()-dset.times[0].getTime())/(dset.rate*60*1000));
 	}
 	
 	public ArrayList<String> reportStrings(Cosine wave)

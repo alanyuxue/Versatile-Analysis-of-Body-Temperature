@@ -55,7 +55,7 @@ import org.jfree.ui.ApplicationFrame;
 public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
-    private TimeSeriesCollection roiData = new TimeSeriesCollection( );
+    private TimeSeriesCollection roiData = new TimeSeriesCollection();
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
