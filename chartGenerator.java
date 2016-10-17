@@ -1,3 +1,4 @@
+package cits3200;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -57,6 +58,7 @@ public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
+    private TimeSeries analysis = new TimeSeries("Analysis");
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
@@ -111,7 +113,10 @@ public class chartGenerator extends JInternalFrame {
   	  }
   	}
     private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
-    	final TimeSeries analysis = new TimeSeries("Analysis");
+    	if (roiData.indexOf(analysis) != -1){
+    		roiData.removeSeries(analysis);
+    	}
+    	analysis = new TimeSeries("Analysis");
     	int length = dates.size();
     	for(int i = 0;i<length;i++){
     		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
