@@ -42,6 +42,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Day;
@@ -57,11 +58,12 @@ public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
+    private TimeSeries analysis = new TimeSeries("Analysis");
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
-    static Date start, end;
+    Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -73,12 +75,18 @@ public class chartGenerator extends JInternalFrame {
     	start = dset.startDate;
     	end = dset.endDate;
     	chartPanel = createChart(dset);
+    	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel.add(createZoomOut());
         panel.add(createZoomIn());
+        
+        JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
+        JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
+        panel.add(lowerLabel);
         panel.add(lowerBound());
+        panel.add(upperLabel);
         panel.add(upperBound());
         panel.add(analyse());
         add(panel, BorderLayout.SOUTH);
@@ -111,11 +119,15 @@ public class chartGenerator extends JInternalFrame {
   	  }
   	}
     private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
-    	final TimeSeries analysis = new TimeSeries("Analysis");
+    	if (roiData.indexOf(analysis) != -1){
+    		roiData.removeSeries(analysis);
+    	}
+    	analysis = new TimeSeries("Analysis");
     	int length = dates.size();
     	for(int i = 0;i<length;i++){
     		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
     	}
+    	
     	roiData.addSeries(analysis);
     }
     
@@ -176,7 +188,6 @@ public class chartGenerator extends JInternalFrame {
 		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		    	a.getOutliers(a.dateToIndex(start),a.dateToIndex(end),wave,2);
 		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
 			}
 		});
@@ -193,7 +204,11 @@ public class chartGenerator extends JInternalFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))        
+    	         (c == KeyEvent.VK_DELETE) || 
+    	         (c == KeyEvent.VK_ENTER) || 
+    	         (c == KeyEvent.VK_SLASH) || 
+    	         (c == KeyEvent.VK_SPACE) || 
+    	         (c == ':')))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -223,16 +238,18 @@ public class chartGenerator extends JInternalFrame {
     }
     
     private JFormattedTextField upperBound() {
-    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
-    	upperBound.setColumns(16);
+    	upperBound.setColumns(10);
     	upperBound.setValue(end);
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
-    	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))
+    	    		  (c == KeyEvent.VK_BACK_SPACE) ||
+    	    	         (c == KeyEvent.VK_DELETE) || 
+    	    	         (c == KeyEvent.VK_ENTER) || 
+    	    	         (c == KeyEvent.VK_SLASH)))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
