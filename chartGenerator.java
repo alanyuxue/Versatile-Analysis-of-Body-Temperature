@@ -61,7 +61,7 @@ public class chartGenerator extends JInternalFrame {
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
-    static Date start, end;
+    Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
