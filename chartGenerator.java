@@ -1,4 +1,3 @@
-package cits3200;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -64,7 +63,7 @@ public class chartGenerator extends JInternalFrame {
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
-    static Date start, end;
+    Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -82,7 +81,12 @@ public class chartGenerator extends JInternalFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panel.add(createZoomOut());
         panel.add(createZoomIn());
+        
+        JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
+        JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
+        panel.add(lowerLabel);
         panel.add(lowerBound());
+        panel.add(upperLabel);
         panel.add(upperBound());
         panel.add(analyse());
         add(panel, BorderLayout.SOUTH);
@@ -200,7 +204,11 @@ public class chartGenerator extends JInternalFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))        
+    	         (c == KeyEvent.VK_DELETE) || 
+    	         (c == KeyEvent.VK_ENTER) || 
+    	         (c == KeyEvent.VK_SLASH) || 
+    	         (c == KeyEvent.VK_SPACE) || 
+    	         (c == ':')))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -230,16 +238,18 @@ public class chartGenerator extends JInternalFrame {
     }
     
     private JFormattedTextField upperBound() {
-    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
-    	upperBound.setColumns(16);
+    	upperBound.setColumns(10);
     	upperBound.setValue(end);
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
-    	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH) || (c == KeyEvent.VK_SPACE) || (c == KeyEvent.VK_COLON)))
+    	    		  (c == KeyEvent.VK_BACK_SPACE) ||
+    	    	         (c == KeyEvent.VK_DELETE) || 
+    	    	         (c == KeyEvent.VK_ENTER) || 
+    	    	         (c == KeyEvent.VK_SLASH)))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();

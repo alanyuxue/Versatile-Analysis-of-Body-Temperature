@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 class Analyser
 {
 	public DataSet dset;
+	public ArrayList<Integer> outliers;
 	
 	public Analyser(DataSet ds)
 	{
@@ -61,23 +62,21 @@ class Analyser
 		return sum/N;
 	}
 	
-	public ArrayList<Integer> getOutliers(int start, int end, Cosine curve, double thresh)
+	public void getOutliers(int start, int end, Cosine curve, double thresh)
 	{
-		ArrayList<Integer> list = new ArrayList<Integer>();
-		for(int i=start; i<=end; i++)
+		outliers = new ArrayList<Integer>();
+		for(int i=start; i<end && i<dset.values.length; i++)
 		{
 			double dif = Math.abs(curve.getValue(i*dset.rate)-dset.values[i]);
 			if(dif > thresh*curve.getAmplitude())
-				list.add(i);
+				outliers.add(i);
 		}
-		return list;
 	}
 	
 	public ArrayList<String> outlierRanges(int start, int end, Cosine curve, double thresh)
 	{
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		ArrayList<String> strs = new ArrayList<String>();
-		ArrayList<Integer> outliers = getOutliers(start,end,curve,thresh);
 		int N = end-start+1;
 		boolean[] isOutlier = new boolean[N];
 		for(int i : outliers)
@@ -193,5 +192,26 @@ class Analyser
 		}
 		return values;
 	}
+	
+	public ArrayList<Date> outlierDates()
+	{
+		ArrayList<Date> dates = new ArrayList<Date>();
+		for(int i : outliers)
+		{
+			dates.add(indexToDate(i));
+		}
+		return dates;
+	}
+	
+	public ArrayList<Double> outlierValues()
+	{
+		ArrayList<Double> values = new ArrayList<Double>();
+		for(int i : outliers)
+		{
+			values.add(dset.values[i]);
+		}
+		return values;
+	}
+	
 
 }
