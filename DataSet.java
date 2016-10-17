@@ -47,8 +47,10 @@ class DataSet
 			}
 			//Get sampling rate based off first 2 entries
 			rate = (int) ((times[1].getTime()-times[0].getTime())/(1000*60));
+			
+			int samplesperday=1440/rate;
 			startDate = times[0];
-			endDate = times[N-1];
+			endDate = new Date(times[samplesperday*(Math.floorDiv(N, samplesperday))-1].getTime()+rate*60*1000);
 			s.close();
 		}
 		catch (FileNotFoundException e)

@@ -13,8 +13,8 @@ class Analyser
 	
 	public double getPeriod(int start, int end)
 	{
-		int N = end-start+1;
-		double[] reals = Arrays.copyOfRange(dset.values,start,end+1);
+		int N = end-start;
+		double[] reals = Arrays.copyOfRange(dset.values,start,end);
 		double[] ims = new double[N];
 		FFT.transform(reals,ims);
 		double[] result = new double[N];
@@ -36,13 +36,13 @@ class Analyser
 			}
 		}
 
-		return ((start+N)/maxid)*dset.rate;
+		return ((N)/maxid)*dset.rate;
 	}
 	
 	public Cosine doCosinor(double period, int start, int end)
 	{
-		int N = end-start+1;
-		double[] values = Arrays.copyOfRange(dset.values, start, end+1);
+		int N = end-start;
+		double[] values = Arrays.copyOfRange(dset.values, start, end);
 		double[] times = new double[N];
 		for(int i=0; i<N; i++)
 			times[i] = dset.rate*i;
@@ -127,7 +127,7 @@ class Analyser
 	
 	public int dateToIndex(Date d)
 	{
-		return (int) ((d.getTime()-dset.times[0].getTime())/(dset.rate*60*1000));
+		return (int) ((d.getTime()-dset.startDate.getTime())/(dset.rate*60*1000));
 	}
 	
 	public ArrayList<String> reportStrings(Cosine wave)
@@ -174,19 +174,20 @@ class Analyser
 		ArrayList<Date> dates = new ArrayList<Date>();
 		int i = dateToIndex(s);
 		int j = dateToIndex(e);
-		for(int k=i; k<=j; k++)
+		System.out.println("Index range: "+i+" to "+j);
+		for(int k=i; k<j && k<dset.times.length; k++)
 		{
 			dates.add(dset.times[k]);
 		}
 		return dates;
 	}
 	
-	public ArrayList<Double> fittedValues(Date s, Date e,Cosine wave)
+	public ArrayList<Double> fittedValues(Date s, Date e, Cosine wave)
 	{
 		ArrayList<Double> values = new ArrayList<Double>();
 		int i = dateToIndex(s);
 		int j = dateToIndex(e);
-		for(int k=i; k<=j; k++)
+		for(int k=i; k<j && k<dset.times.length; k++)
 		{
 			values.add(getValueFromDate(dset.times[k],wave));
 		}
