@@ -119,16 +119,15 @@ class Analyser
 	
 	public Date indexToDate(int i)
 	{
-		//return new Date(dset.times[0].getTime()+i*dset.rate*60*1000);
 		 Calendar cal = Calendar.getInstance();
 		 cal.setTime(dset.times[0]);
 		 cal.add(Calendar.MINUTE, i*dset.rate);
 		 return cal.getTime();
 	}
 	
-	public int DateToIndex(Date d)
+	public int dateToIndex(Date d)
 	{
-		return (int) (d.getTime()-dset.times[0].getTime())/dset.rate;
+		return (int) ((d.getTime()-dset.times[0].getTime())/(dset.rate*60*1000));
 	}
 	
 	public ArrayList<String> reportStrings(Cosine wave)
@@ -139,7 +138,7 @@ class Analyser
 		str.add("MESOR: "+wave.getMESOR());
 		str.add("Amplitude: "+wave.getAmplitude());
 		str.add("Acrophase: "+wave.getAcrophase()+" minutes");
-		ArrayList<String> outliers = outlierRanges(0,dset.N-1,wave,3);
+		ArrayList<String> outliers = outlierRanges(0,dset.N-1,wave,2);
 		str.add("Outliers: ");
 		for(String s : outliers)
 			str.add(s);
@@ -164,4 +163,34 @@ class Analyser
 			return false;
 		}
 	}
+	
+	public double getValueFromDate(Date d, Cosine wave)
+	{
+		return wave.getValue((d.getTime()-dset.startDate.getTime())/(60*1000));
+	}
+	
+	public ArrayList<Date> fittedDates(Date s, Date e)
+	{
+		ArrayList<Date> dates = new ArrayList<Date>();
+		int i = dateToIndex(s);
+		int j = dateToIndex(e);
+		for(int k=i; k<=j; k++)
+		{
+			dates.add(dset.times[k]);
+		}
+		return dates;
+	}
+	
+	public ArrayList<Double> fittedValues(Date s, Date e,Cosine wave)
+	{
+		ArrayList<Double> values = new ArrayList<Double>();
+		int i = dateToIndex(s);
+		int j = dateToIndex(e);
+		for(int k=i; k<=j; k++)
+		{
+			values.add(getValueFromDate(dset.times[k],wave));
+		}
+		return values;
+	}
+
 }

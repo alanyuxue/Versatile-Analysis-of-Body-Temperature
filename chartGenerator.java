@@ -61,7 +61,7 @@ public class chartGenerator extends JInternalFrame {
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
-    static Date start, end;
+    Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -110,7 +110,7 @@ public class chartGenerator extends JInternalFrame {
   	    System.out.println("Selected: " + e.getActionCommand());
   	  }
   	}
-    private void addData(ArrayList<Date> dates ,ArrayList<Integer> values){
+    private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
     	final TimeSeries analysis = new TimeSeries("Analysis");
     	int length = dates.size();
     	for(int i = 0;i<length;i++){
@@ -165,8 +165,8 @@ public class chartGenerator extends JInternalFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Analyser a = new Analyser(dset);
-				double p = a.getPeriod(0,dset.N-1);
-		    	Cosine wave = a.doCosinor(p,0,dset.N-1);
+				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
+		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
 				
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
@@ -176,6 +176,7 @@ public class chartGenerator extends JInternalFrame {
 		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
 			}
 		});
     	return analyse;
@@ -208,7 +209,10 @@ public class chartGenerator extends JInternalFrame {
 					e1.printStackTrace();
 				}
             	if(start.after(dset.startDate) && start.before(dset.endDate)){
-            		if (start.before(end)) chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            		if (start.before(end)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.startDate = start;
+            		}
             		else JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
 				}
             	else JOptionPane.showMessageDialog(null, "Lower Bound is outside date range");
@@ -246,7 +250,10 @@ public class chartGenerator extends JInternalFrame {
 					e1.printStackTrace();
 				}            	
             	if(end.after(dset.startDate) && end.before(dset.endDate)){
-            		if (end.after(start)) chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            		if (end.after(start)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.endDate = end;
+            		}
             		else JOptionPane.showMessageDialog(null, "Upper Bound is Lower than Lower Bound");
 				}
             	else JOptionPane.showMessageDialog(null, "Upper Bound is outside date range");
