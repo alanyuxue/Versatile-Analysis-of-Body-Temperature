@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -60,13 +62,14 @@ public class chartGenerator extends JInternalFrame {
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
     private TimeSeries analysis = new TimeSeries("Analysis");
+    private TimeSeries outliers = new TimeSeries("Outliers");
     private static DataSet dset;
     private static Analyser a=null;
     private static Cosine wave;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
-    Date start, end;
+    public Date start, end;
     double outlier = 2.0;
     
     public chartGenerator(DataSet ds) {
@@ -79,6 +82,8 @@ public class chartGenerator extends JInternalFrame {
     	start = dset.startDate;
     	end = dset.endDate;
 
+		
+		
     	chartPanel = createChart(dset);
     	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
@@ -111,11 +116,6 @@ public class chartGenerator extends JInternalFrame {
         return new ChartPanel(chart);
     }
     
-    class MenuActionListener implements ActionListener {
-  	  public void actionPerformed(ActionEvent e) {
-  	    System.out.println("Selected: " + e.getActionCommand());
-  	  }
-  	}
     private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
     	if (roiData.indexOf(analysis) != -1){
     		roiData.removeSeries(analysis);
@@ -127,6 +127,18 @@ public class chartGenerator extends JInternalFrame {
     	}
     	
     	roiData.addSeries(analysis);
+    }
+
+    public void addOutliers(ArrayList<Date> dates, ArrayList<Double> values){
+    	if (roiData.indexOf(outliers) != -1){
+    		roiData.removeSeries(outliers);
+    	}
+    	outliers = new TimeSeries("Outliers");
+    	int size = dates.size();
+    	for(int i =0; i< size;i++){
+    		outliers.addOrUpdate(new Minute(dates.get(i)),values.get(i));
+    	}
+    	roiData.addSeries(outliers);
     }
     
     private static TimeSeriesCollection createDataset(DataSet dset){
@@ -141,7 +153,7 @@ public class chartGenerator extends JInternalFrame {
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection( );
 	     dataset.addSeries(series);
 	     return dataset;
-  }
+	     }
     
     private JButton createZoomOut() {
         final JButton auto = new JButton(new AbstractAction("Zoom Out") {
@@ -174,7 +186,6 @@ public class chartGenerator extends JInternalFrame {
     	JFormattedTextField lowerBound = new JFormattedTextField(df);
     	lowerBound.setColumns(16);
     	lowerBound.setMaximumSize(new Dimension(300,30));
-//    	lowerBound.setText(df.format(start));
     	lowerBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
@@ -218,7 +229,6 @@ public class chartGenerator extends JInternalFrame {
     	JFormattedTextField upperBound = new JFormattedTextField(df);
     	upperBound.setColumns(10);
     	upperBound.setMaximumSize(new Dimension(300,30));
-//    	upperBound.setText(df.format(end));
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
@@ -261,17 +271,32 @@ public class chartGenerator extends JInternalFrame {
 		JTextField outlierTextField = new JTextField();
 		outlierTextField.setMaximumSize(new Dimension(300,30));
 		outlierTextField.setText("2.0");
-		try {
-			outlier = Double.parseDouble(outlierTextField.getText());
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Please enter a double number");
-		}
+		
+		outlierTextField.addKeyListener(new KeyAdapter() {
+    	    public void keyTyped(KeyEvent e) {
+      	      char c = e.getKeyChar();
+      	      if (!((c >= '0') && (c <= '9') ||
+      	    		  (c == KeyEvent.VK_BACK_SPACE) ||
+      	    	         (c == KeyEvent.VK_DELETE) || 
+      	    	         (c == KeyEvent.VK_ENTER) || 
+      	    	         (c == KeyEvent.VK_PERIOD)))
+      	      {
+      	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
+      	        e.consume();
+      	      }
+      	    }
+      	  });
 		
 		outlierTextField.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				try {
+					outlier = Double.parseDouble(outlierTextField.getText());
+					
+				} catch (NumberFormatException e1) {
+					JOptionPane.showMessageDialog(null, "Please enter a double number");
+				}
 			}
 		});
 		
@@ -287,6 +312,9 @@ public class chartGenerator extends JInternalFrame {
 				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
 		    	wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
+				result.startDate.setText(start.toString());
+				result.endDate.setText(end.toString());
+				result.out.setText("Outlier Sensitivity: "+Double.toString(outlier));
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
 		    	result.period.setText("Period: "+ p+ " minutes");
 		    	result.mesor.setText("MESOR: "+wave.getMESOR());
@@ -328,17 +356,12 @@ public class chartGenerator extends JInternalFrame {
 		
 		return produceReport;
 	}
-    public void addOutliers(ArrayList<Date> dates, ArrayList<Double> values){
-    	TimeSeries outliers = new TimeSeries("Outliers");
-    	int size = dates.size();
-    	for(int i =0; i< size;i++){
-    		outliers.addOrUpdate(new Minute(dates.get(i)),values.get(i));
-    	}
-    	roiData.addSeries(outliers);
-    }
 	
     private class ResultPanel extends JPanel{
     	
+    	JLabel startDate = new JLabel();
+    	JLabel endDate = new JLabel();
+    	JLabel out = new JLabel();
     	JLabel rate = new JLabel();
     	JLabel period = new JLabel();
     	JLabel mesor = new JLabel();
@@ -346,6 +369,9 @@ public class chartGenerator extends JInternalFrame {
     	JLabel acrophase = new JLabel();
 		JLabel msr1 = new JLabel();
 		JLabel msr2 = new JLabel();
+		JFormattedTextField lower = lowerBound();
+        JFormattedTextField upper = upperBound();
+        JTextField outlierText = outlierTextField();
 		
     	private ResultPanel() {
         	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -353,17 +379,23 @@ public class chartGenerator extends JInternalFrame {
         	JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
             JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
             JLabel outlierLabel = new JLabel("Outlier Sensitivity:");
+            
+            
             add(lowerLabel);
-            add(lowerBound());
+            add(lower);
             add(upperLabel);
-            add(upperBound());
+            add(upper);
             add(outlierLabel);
-            add(outlierTextField());
+            add(outlierText);
             add(analyse());
             add(produceReport());
+            add(reset());
             
         	JLabel title = new JLabel("Results:");
         	add(title);
+        	add(startDate);
+            add(endDate);
+            add(out);
         	add(rate);
 	    	add(period);
 	    	add(mesor);
@@ -371,6 +403,25 @@ public class chartGenerator extends JInternalFrame {
 	    	add(acrophase);
 	    	add(msr1);
 	    	add(msr2);
+    	}
+    	
+    	private JButton reset() {
+    		JButton reset = new JButton(new AbstractAction("Reset") {
+    			
+    			@Override
+    			public void actionPerformed(ActionEvent e) {
+    				start = dset.startDate;
+    				end = dset.endDate;
+    				outlier = 2.0;
+    				lower.setText("");
+    				upper.setText("");
+    				outlierText.setText("2.0");
+    				chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+    				roiData.removeSeries(analysis);
+    				roiData.removeSeries(outliers);
+    			}
+    		});
+    		return reset;
     	}
     }
 }
