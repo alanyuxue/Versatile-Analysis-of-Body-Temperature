@@ -1,61 +1,36 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.Time;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.xml.crypto.Data;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.Day;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.time.Year;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.ApplicationFrame;
-
 
 public class chartGenerator extends JInternalFrame {
 
@@ -81,9 +56,7 @@ public class chartGenerator extends JInternalFrame {
     	dset = ds;
     	start = dset.startDate;
     	end = dset.endDate;
-
-		
-		
+    	
     	chartPanel = createChart(dset);
     	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
@@ -99,13 +72,15 @@ public class chartGenerator extends JInternalFrame {
         setLocation(xOffset*openChartCount,yOffset*openChartCount);
     }
     
-    
-    
     private ChartPanel createChart(DataSet dset) {
         roiData = createDataset(dset);
         
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-        		"Temperature Analysis #" + openChartCount, "Date", "Temperature", roiData, true, true, false);
+        		"Temperature Analysis #" + openChartCount, 
+        		"Date", 
+        		"Temperature", 
+        		roiData, 
+        		true, true, false);
         
         XYPlot plot = chart.getXYPlot();
         plot.setDomainPannable(true);
@@ -147,8 +122,8 @@ public class chartGenerator extends JInternalFrame {
 		 int N = dset.N;
 		 for(int i=0; i<N; i++)
 		 {
-		   d = dset.values[i];
-		   series.addOrUpdate(new Minute(dset.times[i]),d);
+			 d = dset.values[i];
+			 series.addOrUpdate(new Minute(dset.times[i]),d);
 		 }
 	     final TimeSeriesCollection dataset = new TimeSeriesCollection( );
 	     dataset.addSeries(series);
@@ -221,6 +196,18 @@ public class chartGenerator extends JInternalFrame {
             	else JOptionPane.showMessageDialog(null, "Lower Bound is outside date range");
             }
         });
+        
+        lowerBound.addFocusListener(new FocusListener(){
+	        @Override
+	        public void focusGained(FocusEvent e){
+	            lowerBound.setText(df.format(start));
+	        }
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				lowerBound.setText(df.format(start));
+			}
+	    });
         return lowerBound;
     }
     
@@ -264,6 +251,18 @@ public class chartGenerator extends JInternalFrame {
             	else JOptionPane.showMessageDialog(null, "Upper Bound is outside date range");
             }
         });
+    	
+    	upperBound.addFocusListener(new FocusListener(){
+	        @Override
+	        public void focusGained(FocusEvent e){
+	            upperBound.setText(df.format(end));
+	        }
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				upperBound.setText(df.format(end));
+			}
+	    });
         return upperBound;
     }
     
@@ -300,6 +299,18 @@ public class chartGenerator extends JInternalFrame {
 			}
 		});
 		
+		outlierTextField.addFocusListener(new FocusListener(){
+	        @Override
+	        public void focusGained(FocusEvent e){
+	            outlierTextField.setText(Double.toString(outlier));
+	        }
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				outlierTextField.setText(Double.toString(outlier));
+			}
+	    });
+		
 		return outlierTextField;
 	}
 	
@@ -312,8 +323,8 @@ public class chartGenerator extends JInternalFrame {
 				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
 		    	wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
-				result.startDate.setText(start.toString());
-				result.endDate.setText(end.toString());
+				result.startDate.setText("Start: "+start.toString());
+				result.endDate.setText("End: "+end.toString());
 				result.out.setText("Outlier Sensitivity: "+Double.toString(outlier));
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
 		    	result.period.setText("Period: "+ p+ " minutes");
@@ -331,7 +342,6 @@ public class chartGenerator extends JInternalFrame {
 		});
     	return analyse;
     }
-    
     
 	private JButton produceReport() {
 		JButton produceReport = new JButton(new AbstractAction("Produce Report") {
@@ -380,7 +390,6 @@ public class chartGenerator extends JInternalFrame {
             JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
             JLabel outlierLabel = new JLabel("Outlier Sensitivity:");
             
-            
             add(lowerLabel);
             add(lower);
             add(upperLabel);
@@ -415,7 +424,7 @@ public class chartGenerator extends JInternalFrame {
     				outlier = 2.0;
     				lower.setText("");
     				upper.setText("");
-    				outlierText.setText("2.0");
+    				outlierText.setText(Double.toString(outlier));
     				chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
     				roiData.removeSeries(analysis);
     				roiData.removeSeries(outliers);
