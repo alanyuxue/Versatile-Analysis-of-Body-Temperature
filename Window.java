@@ -8,6 +8,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.ui.RefineryUtilities;
@@ -238,32 +239,25 @@ public class Window extends JFrame implements ActionListener
   	
     	//process data
 //		System.out.println("Reading file");
-		DataSet dset = new DataSet(file);
-/*
-		Analyser a = new Analyser(dset);
-		System.out.println("Performing periodogram");
-		double period = a.getPeriod();
-		System.out.println("Period: "+period+" minutes");
-		System.out.println("Performing Cosinor");
-		Cosine wave = a.doCosinor(period);
-		System.out.println("MESOR: "+wave.getMESOR());
-		System.out.println("Amplitude: "+wave.getAmplitude());
-		System.out.println("Acrophase: "+wave.getAcrophase()+" minutes");
-		double MSR = a.getMSR(wave);
-		System.out.println("Mean Square Residual: "+MSR+"("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-		System.out.println();
-*/
-		//create chart
-		chartGenerator chart = new chartGenerator(dset);
-
-		chart.setVisible(true);
-        desktop.add(chart);
-        
-        //always put new chart on top of others
-        try {
-            chart.setSelected(true);
-        } catch (java.beans.PropertyVetoException e) {}
-
+		try
+		{
+			DataSet dset = new DataSet(file);
+			//create chart
+			chartGenerator chart = new chartGenerator(dset);
+	
+			chart.setVisible(true);
+	        desktop.add(chart);
+	        
+	        //always put new chart on top of others
+	        try {
+	            chart.setSelected(true);
+	        } catch (java.beans.PropertyVetoException e) {}
+		}
+		catch (Exception e)
+		{
+			JOptionPane.showMessageDialog(null, "Failed to read. File may not be formatted correctly");
+		}
+		
 	}
 
     //Quit the application.

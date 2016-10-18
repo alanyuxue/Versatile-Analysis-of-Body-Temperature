@@ -13,9 +13,8 @@ class DataSet
 	public Date startDate;
 	public Date endDate;
 	
-	public DataSet(File datafile)
+	public DataSet(File datafile) throws Exception
 	{
-		try
 		{
 			Scanner s = new Scanner(datafile);
 			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -35,11 +34,11 @@ class DataSet
 				{
 					//Bad file
 				}
-				try
+				//try
 				{
 					times[i] = format.parse(parts[0]);
 				}
-				catch(Exception e)
+				//catch(Exception e)
 				{
 					
 				}
@@ -52,10 +51,6 @@ class DataSet
 			startDate = times[0];
 			endDate = new Date(times[samplesperday*(Math.floorDiv(N, samplesperday))-1].getTime()+rate*60*1000);
 			s.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			
 		}
 	}
 }
