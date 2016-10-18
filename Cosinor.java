@@ -1,3 +1,5 @@
+package cits3200;
+
 public class Cosinor
 {
 	public static Cosine solve(double[] times, double[] values, double period)

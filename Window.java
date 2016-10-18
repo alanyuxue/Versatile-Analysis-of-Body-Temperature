@@ -1,3 +1,5 @@
+package cits3200;
+
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.AbstractAction;

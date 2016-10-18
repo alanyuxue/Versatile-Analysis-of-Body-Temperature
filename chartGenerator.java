@@ -1,3 +1,5 @@
+package cits3200;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -40,8 +42,10 @@ import javax.swing.JLabel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Day;
@@ -57,10 +61,12 @@ public class chartGenerator extends JInternalFrame {
 
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
+    private TimeSeries analysis = new TimeSeries("Analysis");
     private static DataSet dset;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
+    Date start, end;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -69,15 +75,17 @@ public class chartGenerator extends JInternalFrame {
     			true,	//maximisable
     			true);	//iconifiable
     	dset = ds;
+    	start = dset.startDate;
+    	end = dset.endDate;
+
     	chartPanel = createChart(dset);
+    	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
         add(chartPanel, BorderLayout.CENTER);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(createZoomOut());
         panel.add(createZoomIn());
-        panel.add(lowerBound());
-        panel.add(upperBound());
-        panel.add(analyse());
+        
         add(panel, BorderLayout.SOUTH);
         add(result,BorderLayout.EAST);
         pack();
@@ -107,12 +115,16 @@ public class chartGenerator extends JInternalFrame {
   	    System.out.println("Selected: " + e.getActionCommand());
   	  }
   	}
-    private void addData(ArrayList<Date> dates ,ArrayList<Integer> values){
-    	final TimeSeries analysis = new TimeSeries("Analysis");
+    private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
+    	if (roiData.indexOf(analysis) != -1){
+    		roiData.removeSeries(analysis);
+    	}
+    	analysis = new TimeSeries("Analysis");
     	int length = dates.size();
     	for(int i = 0;i<length;i++){
     		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
     	}
+    	
     	roiData.addSeries(analysis);
     }
     
@@ -156,38 +168,22 @@ public class chartGenerator extends JInternalFrame {
         return auto;
     }
     
-    private JButton analyse() {
-    	JButton analyse = new JButton(new AbstractAction("Analyse") {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Analyser a = new Analyser(dset);
-				double p = a.getPeriod(0,dset.N-1);
-		    	Cosine wave = a.doCosinor(p,0,dset.N-1);
-				double MSR = a.getMSR(wave);
-				
-				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
-		    	result.period.setText("Period: "+ p+ " minutes");
-		    	result.mesor.setText("MESOR: "+wave.getMESOR());
-		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
-		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
-		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
-		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
-			}
-		});
-    	return analyse;
-    }
-    
-    private JFormattedTextField lowerBound() {
-    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	private JFormattedTextField lowerBound() {
+    	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     	JFormattedTextField lowerBound = new JFormattedTextField(df);
-    	lowerBound.setColumns(10);
+    	lowerBound.setColumns(16);
+    	lowerBound.setMaximumSize(new Dimension(300,30));
+//    	lowerBound.setText(df.format(start));
     	lowerBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) ||(c == KeyEvent.VK_SLASH)))        
+    	         (c == KeyEvent.VK_DELETE) || 
+    	         (c == KeyEvent.VK_ENTER) || 
+    	         (c == KeyEvent.VK_SLASH) || 
+    	         (c == KeyEvent.VK_SPACE) || 
+    	         (c == ':')))        
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -198,36 +194,38 @@ public class chartGenerator extends JInternalFrame {
         lowerBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-            	final double r2 = chartPanel.getChart().getXYPlot().getDomainAxis().getUpperBound();        	
-            	Date startDate = null;
             	try {
-					startDate = df.parse(lowerBound.getText());
+					start = df.parse(lowerBound.getText());
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}
-            	if(startDate.before(dset.times[dset.N-1])){
-            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) startDate.getTime(),r2);
+            	if(start.after(dset.startDate) && start.before(dset.endDate)){
+            		if (start.before(end)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.startDate = start;
+            		}
+            		else JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
 				}
-            	else{
-            		JOptionPane.showMessageDialog(null, "Lower Bound is Higher than Upper Bound");
-            	}
-    			
-    			lowerBound.setText("");
+            	else JOptionPane.showMessageDialog(null, "Lower Bound is outside date range");
             }
         });
         return lowerBound;
     }
     
-    private JFormattedTextField upperBound() {
+	private JFormattedTextField upperBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
     	upperBound.setColumns(10);
+    	upperBound.setMaximumSize(new Dimension(300,30));
+//    	upperBound.setText(df.format(end));
     	upperBound.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
-    	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || (c == KeyEvent.VK_ENTER) || (c == KeyEvent.VK_SLASH)))        
+    	    		  (c == KeyEvent.VK_BACK_SPACE) ||
+    	    	         (c == KeyEvent.VK_DELETE) || 
+    	    	         (c == KeyEvent.VK_ENTER) || 
+    	    	         (c == KeyEvent.VK_SLASH)))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
@@ -239,26 +237,94 @@ public class chartGenerator extends JInternalFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-            	final double r1 = chartPanel.getChart().getXYPlot().getDomainAxis().getLowerBound();        	
-            	Date startDate = null;
             	try {
-					startDate = df.parse(upperBound.getText());
+					end = df.parse(upperBound.getText());
 					
 				} catch (ParseException e1) {
 					e1.printStackTrace();
 				}            	
-            	if(startDate.after(dset.times[0])){
-            		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(r1,(double) startDate.getTime());
+            	if(end.after(dset.startDate) && end.before(dset.endDate)){
+            		if (end.after(start)) {
+            			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
+            			//dset.endDate = end;
+            		}
+            		else JOptionPane.showMessageDialog(null, "Upper Bound is Lower than Lower Bound");
 				}
-            	else{
-            		JOptionPane.showMessageDialog(null, "Upper bound is lower than lower bound");
-            	}
-    			upperBound.setText("");
+            	else JOptionPane.showMessageDialog(null, "Upper Bound is outside date range");
             }
         });
         return upperBound;
     }
     
+	private JTextField outlierTextField() {
+		JTextField outlierTextField = new JTextField();
+		outlierTextField.setMaximumSize(new Dimension(300,30));
+		outlierTextField.setText("0.0");
+		double outlier;
+		try {
+			outlier = Double.parseDouble(outlierTextField.getText());
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Please enter a double number");
+		}
+		
+		outlierTextField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		
+		return outlierTextField;
+	}
+	
+    private JButton analyse() {
+    	JButton analyse = new JButton(new AbstractAction("Analyse") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Analyser a = new Analyser(dset);
+				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
+		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
+				double MSR = a.getMSR(wave);
+				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
+		    	result.period.setText("Period: "+ p+ " minutes");
+		    	result.mesor.setText("MESOR: "+wave.getMESOR());
+		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
+		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
+		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
+		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
+		    	ArrayList<Date> dates = a.outlierDates();
+				ArrayList<Double> values = a.outlierValues();
+				addOutliers(dates,values);
+			}
+		});
+    	return analyse;
+    }
+    
+    
+	private JButton produceReport() {
+		JButton produceReport = new JButton(new AbstractAction("Produce Report") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		return produceReport;
+	}
+    public void addOutliers(ArrayList<Date> dates, ArrayList<Double> values){
+    	TimeSeries outliers = new TimeSeries("Outliers");
+    	int size = dates.size();
+    	for(int i =0; i< size;i++){
+    		outliers.addOrUpdate(new Minute(dates.get(i)),values.get(i));
+    	}
+    	roiData.addSeries(outliers);
+    }
+	
     private class ResultPanel extends JPanel{
     	
     	JLabel rate = new JLabel();
@@ -272,7 +338,19 @@ public class chartGenerator extends JInternalFrame {
     	private ResultPanel() {
         	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         	
-        	JLabel title = new JLabel("Analyse Result                                ");
+        	JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
+            JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
+            JLabel outlierLabel = new JLabel("Outlier Sensitivity:");
+            add(lowerLabel);
+            add(lowerBound());
+            add(upperLabel);
+            add(upperBound());
+            add(outlierLabel);
+            add(outlierTextField());
+            add(analyse());
+            add(produceReport());
+            
+        	JLabel title = new JLabel("Results:");
         	add(title);
         	add(rate);
 	    	add(period);
