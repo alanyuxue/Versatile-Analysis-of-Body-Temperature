@@ -1,5 +1,5 @@
 //This class represents a cosine curve of the form Y(t) = M + Acos(2pi*t/tau+phi)
-package cits3200;
+
 public class Cosine
 {
 	public double M;

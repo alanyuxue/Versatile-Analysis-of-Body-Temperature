@@ -1,5 +1,3 @@
-package cits3200;
-
 import java.io.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -8,6 +6,7 @@ class Analyser
 {
 	public DataSet dset;
 	public ArrayList<Integer> outliers;
+	public double outlierSense = 2.0;
 	
 	public Analyser(DataSet ds)
 	{
@@ -66,6 +65,7 @@ class Analyser
 	
 	public void getOutliers(int start, int end, Cosine curve, double thresh)
 	{
+		outlierSense = thresh;
 		outliers = new ArrayList<Integer>();
 		for(int i=start; i<end && i<dset.values.length; i++)
 		{
@@ -131,7 +131,7 @@ class Analyser
 		return (int) ((d.getTime()-dset.startDate.getTime())/(dset.rate*60*1000));
 	}
 	
-	public ArrayList<String> reportStrings(Cosine wave)
+	public ArrayList<String> reportStrings(Date s, Date e, Cosine wave)
 	{
 		ArrayList<String> str = new ArrayList<String>();
 		str.add("Results for "+dset.name);
@@ -139,29 +139,29 @@ class Analyser
 		str.add("MESOR: "+wave.getMESOR());
 		str.add("Amplitude: "+wave.getAmplitude());
 		str.add("Acrophase: "+wave.getAcrophase()+" minutes");
-		ArrayList<String> outliers = outlierRanges(0,dset.N-1,wave,2);
-		str.add("Outliers: ");
-		for(String s : outliers)
-			str.add(s);
+		ArrayList<String> outliers = outlierRanges(dateToIndex(s),dateToIndex(e),wave,2);
+		str.add("Outliers: (Sensitivity = "+outlierSense+"): ");
+		for(String c : outliers)
+			str.add(c);
 		return str;
 	}
 	
-	public boolean createReport(Cosine wave)
+	public String createReport(Date s, Date e, Cosine wave)
 	{
 		try
 		{
 			PrintWriter writer = new PrintWriter(dset.path+" - REPORT.txt", "UTF-8");
-			ArrayList<String> lines = reportStrings(wave);
+			ArrayList<String> lines = reportStrings(s,e,wave);
 			for(String str : lines)
 			{
 				writer.println(str);
 			}
 			writer.close();
-			return true;
+			return dset.path+" - REPORT.txt";
 		}
-		catch(Exception e)
+		catch(Exception exc)
 		{
-			return false;
+			return "";
 		}
 	}
 	
@@ -175,7 +175,6 @@ class Analyser
 		ArrayList<Date> dates = new ArrayList<Date>();
 		int i = dateToIndex(s);
 		int j = dateToIndex(e);
-		System.out.println("Index range: "+i+" to "+j);
 		for(int k=i; k<j && k<dset.times.length; k++)
 		{
 			dates.add(dset.times[k]);

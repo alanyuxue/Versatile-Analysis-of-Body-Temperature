@@ -1,5 +1,3 @@
-package cits3200;
-
 public class GaussElim
 {
 	public static final double EP = 1e-10;
