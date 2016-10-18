@@ -1,5 +1,3 @@
-package cits3200;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -63,10 +61,13 @@ public class chartGenerator extends JInternalFrame {
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
     private TimeSeries analysis = new TimeSeries("Analysis");
     private static DataSet dset;
+    private static Analyser a=null;
+    private static Cosine wave;
     static int openChartCount = 0;
     static final int xOffset = 30, yOffset = 30;
     ResultPanel result = new ResultPanel();
     Date start, end;
+    double outlier = 2.0;
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -259,8 +260,7 @@ public class chartGenerator extends JInternalFrame {
 	private JTextField outlierTextField() {
 		JTextField outlierTextField = new JTextField();
 		outlierTextField.setMaximumSize(new Dimension(300,30));
-		outlierTextField.setText("0.0");
-		double outlier;
+		outlierTextField.setText("2.0");
 		try {
 			outlier = Double.parseDouble(outlierTextField.getText());
 		} catch (NumberFormatException e) {
@@ -283,9 +283,9 @@ public class chartGenerator extends JInternalFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Analyser a = new Analyser(dset);
+				a = new Analyser(dset);
 				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
-		    	Cosine wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
+		    	wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
 		    	result.period.setText("Period: "+ p+ " minutes");
@@ -295,6 +295,7 @@ public class chartGenerator extends JInternalFrame {
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
+		    	a.getOutliers(a.dateToIndex(start),a.dateToIndex(end), wave, outlier);
 		    	ArrayList<Date> dates = a.outlierDates();
 				ArrayList<Double> values = a.outlierValues();
 				addOutliers(dates,values);
@@ -309,7 +310,18 @@ public class chartGenerator extends JInternalFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				if(a!=null)
+				{
+					String str = a.createReport(start,end,wave);
+					if(str.equals(""))
+						JOptionPane.showMessageDialog(null, "Failed to create report");
+					else
+						JOptionPane.showMessageDialog(null,"Report created at "+str);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null, "Run analysis before creating report");
+				}
 				
 			}
 		});
