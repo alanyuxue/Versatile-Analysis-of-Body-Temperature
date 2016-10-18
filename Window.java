@@ -1,18 +1,11 @@
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.AbstractAction;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.jfree.ui.RefineryUtilities;
-
 import javax.swing.JMenuBar;
 import javax.swing.JFrame;
 import java.awt.event.*;
@@ -25,14 +18,12 @@ public class Window extends JFrame implements ActionListener
     int width;
 	int height;
     boolean fullScreen;
-    int tabs;
 
     public Window() {
-        super("Window");
+        super("Versatile Analysis of Body Temperature");
         width = 1280;
 		height = 720;
 		fullScreen = true;
-		tabs = 0;
 		initUI();
 	}
 
@@ -40,8 +31,6 @@ public class Window extends JFrame implements ActionListener
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         if (fullScreen == true) {
-        	//this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        	//this.setUndecorated(true);
         	setBounds(0, 0,screenSize.width,screenSize.height);
         } else {
         	//Place the window in the middle of the screen
@@ -66,35 +55,13 @@ public class Window extends JFrame implements ActionListener
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
 		//Open
-		//ImageIcon openIcon = new ImageIcon("open.png");
 		JMenuItem openMenuItem = new JMenuItem("Open...");
 		openMenuItem.setMnemonic(KeyEvent.VK_O);
 		openMenuItem.setToolTipText("Open data files");
 		openMenuItem.addActionListener(new OpenFileAction());
 		fileMenu.add(openMenuItem);
 
-		//Open recent
-		JMenu openRecentMenu = new JMenu("Open Recent");
-		fileMenu.add(openRecentMenu);
-		fileMenu.addSeparator();
-
-		//Print
-		//ImageIcon printIcon = new ImageIcon("print.png");
-		JMenuItem printMenuItem = new JMenuItem("Print");
-		printMenuItem.setMnemonic(KeyEvent.VK_P);
-		printMenuItem.setToolTipText("Print results");
-		printMenuItem.addActionListener((ActionEvent event) -> {
-
-		});
-		fileMenu.add(printMenuItem);
-
-		//Export As
-		JMenu exportAsMenu = new JMenu("Export As");
-		fileMenu.add(exportAsMenu);
-		fileMenu.addSeparator();
-
 		//Exit
-		//ImageIcon exitIcon = new ImageIcon("exit.png");
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
 		exitMenuItem.setToolTipText("Exit application");
@@ -105,101 +72,6 @@ public class Window extends JFrame implements ActionListener
 
 		//Add file menu to menu bar
 		menuBar.add(fileMenu);
-
-		//---------------Dataset Analysis Menu-------------
-
-		JMenu datasetAnalysisMenu = new JMenu("Dataset Analysis");
-
-		//Run Curve Analysis
-		//ImageIcon runAnalysisIcon = new ImageIcon("run.png");
-		JMenuItem runAnalysisMenuItem = new JMenuItem("Run Curve Analysis");
-		runAnalysisMenuItem.setMnemonic(KeyEvent.VK_R);
-		runAnalysisMenuItem.setToolTipText("Run Curve Analysis");
-		runAnalysisMenuItem.addActionListener((ActionEvent event) -> {
-
-		});
-		datasetAnalysisMenu.add(runAnalysisMenuItem);
-
-		//Periodogram
-		JCheckBoxMenuItem periodogram = new JCheckBoxMenuItem("Periodogram");
-		periodogram.setMnemonic(KeyEvent.VK_P);
-		periodogram.setDisplayedMnemonicIndex(0);
-		periodogram.setSelected(true);
-
-		periodogram.addItemListener((ItemEvent e) -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-
-			} else {
-
-			}
-		});
-		datasetAnalysisMenu.add(periodogram);
-
-		//Residuals
-		JCheckBoxMenuItem residuals = new JCheckBoxMenuItem("Residuals");
-		residuals.setMnemonic(KeyEvent.VK_R);
-		residuals.setDisplayedMnemonicIndex(0);
-		residuals.setSelected(true);
-
-		periodogram.addItemListener((ItemEvent e) -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-
-			} else {
-
-			}
-		});
-		datasetAnalysisMenu.add(residuals);
-
-		//Curve Fitting
-		JCheckBoxMenuItem curveFitting = new JCheckBoxMenuItem("Curve Fitting");
-		curveFitting.setMnemonic(KeyEvent.VK_F);
-		curveFitting.setDisplayedMnemonicIndex(6);
-		curveFitting.setSelected(true);
-
-		curveFitting.addItemListener((ItemEvent e) -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-
-			} else {
-
-			}
-		});
-		datasetAnalysisMenu.add(curveFitting);
-
-		//Raw Data
-		JCheckBoxMenuItem rawData = new JCheckBoxMenuItem("Raw Data");
-		rawData.setMnemonic(KeyEvent.VK_D);
-		rawData.setDisplayedMnemonicIndex(4);
-		rawData.setSelected(true);
-
-		rawData.addItemListener((ItemEvent e) -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-
-			} else {
-
-			}
-		});
-		datasetAnalysisMenu.add(rawData);
-
-		// Add data analysis menu to menu bar
-		menuBar.add(datasetAnalysisMenu);
-
-		//--------------------Help Menu--------------------
-
-		JMenu helpMenu = new JMenu("Help");
-
-		//Documentation
-		ImageIcon docIcon = new ImageIcon("documentation.png");
-		JMenuItem docMenuItem = new JMenuItem("Documentation",docIcon);
-		docMenuItem.setMnemonic(KeyEvent.VK_D);
-		docMenuItem.setToolTipText("Open documentation");
-		docMenuItem.addActionListener((ActionEvent event) -> {
-
-		});
-		helpMenu.add(docMenuItem);
-
-		//Add help menu to the RIGHT side of menu bar
-		menuBar.add(Box.createHorizontalGlue());
-		menuBar.add(helpMenu);
 
         return menuBar;
     }
@@ -216,29 +88,18 @@ public class Window extends JFrame implements ActionListener
 
 			int ret = fdia.showDialog(panel, "Open file");
 			if (ret == JFileChooser.APPROVE_OPTION) {
-//				System.out.println("file opened");
 				File file =fdia.getSelectedFile();
 				processFile(file);
 			}
-//			else System.out.println("file cannot be opened.");
 		}
 	}
 
-    //React to menu selections.
     public void actionPerformed(ActionEvent e) {
- /*
-        if ("new".equals(e.getActionCommand())) { //new
-            createFrame();
-        } else { //quit
-            quit();
-        }
- */
     }
 
     public void processFile(File file){
   	
     	//process data
-//		System.out.println("Reading file");
 		try
 		{
 			DataSet dset = new DataSet(file);
