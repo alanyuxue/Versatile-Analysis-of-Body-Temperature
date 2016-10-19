@@ -112,7 +112,6 @@ public class chartGenerator extends JInternalFrame {
     }
 
     public void addOutliers(ArrayList<Date> dates, ArrayList<Double> values){
-    	
     	if(outliers.size()!=0){
     		int size = outliers.size();
     		for(int i =0; i <size;i++){
@@ -127,8 +126,9 @@ public class chartGenerator extends JInternalFrame {
             final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
             double millis = dates.get(i).getTime();
             double value = values.get(i);
-            final XYAnnotation outliers = new XYDrawableAnnotation(millis, value, 11, 11, cd);
-    		chartPanel.getChart().getXYPlot().addAnnotation(outliers);
+            final XYAnnotation outliersAnnotation = new XYDrawableAnnotation(millis, value, 11, 11, cd);
+            outliers.add(outliersAnnotation);
+    		chartPanel.getChart().getXYPlot().addAnnotation(outliersAnnotation);
     	}
     }
     
