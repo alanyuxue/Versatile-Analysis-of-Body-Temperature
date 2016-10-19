@@ -1,4 +1,8 @@
+package cits3200;
+
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -7,6 +11,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Ellipse2D;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,6 +29,8 @@ import javax.swing.JLabel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYDrawableAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
@@ -37,7 +44,6 @@ public class chartGenerator extends JInternalFrame {
     public ChartPanel chartPanel;
     private TimeSeriesCollection roiData = new TimeSeriesCollection( );
     private TimeSeries analysis = new TimeSeries("Analysis");
-    private TimeSeries outliers = new TimeSeries("Outliers");
     private static DataSet dset;
     private static Analyser a=null;
     private static Cosine wave;
@@ -46,6 +52,7 @@ public class chartGenerator extends JInternalFrame {
     ResultPanel result = new ResultPanel();
     public Date start, end;
     double outlier = 2.0;
+    ArrayList<XYAnnotation> outliers = new ArrayList<XYAnnotation>();
     
     public chartGenerator(DataSet ds) {
     	super("Temperature Analysis #" + (++openChartCount), 
@@ -105,15 +112,24 @@ public class chartGenerator extends JInternalFrame {
     }
 
     public void addOutliers(ArrayList<Date> dates, ArrayList<Double> values){
-    	if (roiData.indexOf(outliers) != -1){
-    		roiData.removeSeries(outliers);
+    	
+    	if(outliers.size()!=0){
+    		int size = outliers.size();
+    		for(int i =0; i <size;i++){
+    			chartPanel.getChart().getXYPlot().removeAnnotation(outliers.get(i));
+    		}
+    		
     	}
-    	outliers = new TimeSeries("Outliers");
+    	outliers = new ArrayList<XYAnnotation>();
+    	Ellipse2D e = new Ellipse2D.Double(-50.0, -50.0, 100.0, 100.0);
     	int size = dates.size();
     	for(int i =0; i< size;i++){
-    		outliers.addOrUpdate(new Minute(dates.get(i)),values.get(i));
+            final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
+            double millis = dates.get(i).getTime();
+            double value = values.get(i);
+            final XYAnnotation outliers = new XYDrawableAnnotation(millis, value, 11, 11, cd);
+    		chartPanel.getChart().getXYPlot().addAnnotation(outliers);
     	}
-    	roiData.addSeries(outliers);
     }
     
     private static TimeSeriesCollection createDataset(DataSet dset){
@@ -338,9 +354,18 @@ public class chartGenerator extends JInternalFrame {
 		    	ArrayList<Date> dates = a.outlierDates();
 				ArrayList<Double> values = a.outlierValues();
 				addOutliers(dates,values);
+				
 			}
 		});
     	return analyse;
+    }
+    
+    private void removeOutliers(){
+    	int size = outliers.size();
+    	for(int i = 0;i<size;i++){
+    		chartPanel.getChart().getXYPlot().removeAnnotation(outliers.get(i));
+    	}
+			
     }
     
 	private JButton produceReport() {
@@ -366,6 +391,8 @@ public class chartGenerator extends JInternalFrame {
 		
 		return produceReport;
 	}
+	
+	
 	
     private class ResultPanel extends JPanel{
     	
@@ -414,6 +441,7 @@ public class chartGenerator extends JInternalFrame {
 	    	add(msr2);
     	}
     	
+    	
     	private JButton reset() {
     		JButton reset = new JButton(new AbstractAction("Reset") {
     			
@@ -427,7 +455,7 @@ public class chartGenerator extends JInternalFrame {
     				outlierText.setText(Double.toString(outlier));
     				chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
     				roiData.removeSeries(analysis);
-    				roiData.removeSeries(outliers);
+    				removeOutliers();
     			}
     		});
     		return reset;
