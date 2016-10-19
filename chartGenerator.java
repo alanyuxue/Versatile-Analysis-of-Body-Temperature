@@ -74,6 +74,7 @@ public class chartGenerator extends JInternalFrame {
         add(result,BorderLayout.EAST);
         pack();
         setVisible(true);
+        setLocation(xOffset*openChartCount,yOffset*openChartCount);
     }
     
     private ChartPanel createChart(DataSet dset) {
