@@ -1,5 +1,3 @@
-package cits3200;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -341,12 +339,12 @@ public class chartGenerator extends JInternalFrame {
 				double MSR = a.getMSR(wave);
 				result.startDate.setText("Start: "+start.toString());
 				result.endDate.setText("End: "+end.toString());
-				result.out.setText("Outlier Sensitivity: "+Double.toString(outlier));
+				result.out.setText("Outlier Tolerance: "+Double.toString(outlier));
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
-		    	result.period.setText("Period: "+ p+ " minutes");
+		    	result.period.setText("Period: "+ p+ " minutes ("+(p/60)+" hours)");
 		    	result.mesor.setText("MESOR: "+wave.getMESOR());
 		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
-		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes");
+		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes("+(wave.getAcrophase()/60)+" hours)");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
@@ -415,7 +413,7 @@ public class chartGenerator extends JInternalFrame {
         	
         	JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
             JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
-            JLabel outlierLabel = new JLabel("Outlier Sensitivity:");
+            JLabel outlierLabel = new JLabel("Outlier Tolerance:");
             
             add(lowerLabel);
             add(lower);

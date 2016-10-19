@@ -38,10 +38,6 @@ class DataSet
 				{
 					times[i] = format.parse(parts[0]);
 				}
-				//catch(Exception e)
-				{
-					
-				}
 				values[i] = Double.parseDouble(parts[1]);
 			}
 			//Get sampling rate based off first 2 entries

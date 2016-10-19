@@ -134,13 +134,15 @@ class Analyser
 	public ArrayList<String> reportStrings(Date s, Date e, Cosine wave)
 	{
 		ArrayList<String> str = new ArrayList<String>();
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		str.add("Results for "+dset.name);
+		str.add("From "+format.format(s)+" to "+format.format(e));
 		str.add("Period: "+wave.getPeriod()+" minutes ("+(wave.getPeriod()/60)+" hours)");
 		str.add("MESOR: "+wave.getMESOR());
 		str.add("Amplitude: "+wave.getAmplitude());
-		str.add("Acrophase: "+wave.getAcrophase()+" minutes");
+		str.add("Acrophase: "+wave.getAcrophase()+" minutes ("+(wave.getAcrophase()/60)+" hours)");
 		ArrayList<String> outliers = outlierRanges(dateToIndex(s),dateToIndex(e),wave,2);
-		str.add("Outliers: (Sensitivity = "+outlierSense+"): ");
+		str.add("Outliers: (Tolerance = "+outlierSense+"): ");
 		for(String c : outliers)
 			str.add(c);
 		return str;
