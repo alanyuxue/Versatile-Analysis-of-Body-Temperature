@@ -1,11 +1,8 @@
-package cits3200;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -340,7 +337,8 @@ public class chartGenerator extends JInternalFrame {
 		    	result.period.setText("Period: "+ p+ " minutes ("+(p/60)+" hours)");
 		    	result.mesor.setText("MESOR: "+wave.getMESOR());
 		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
-		    	result.acrophase.setText("Acrophase: "+wave.getAcrophase()+" minutes("+(wave.getAcrophase()/60)+" hours)");
+		    	result.acrophase1.setText("Acrophase: "+wave.getAcrophase()+" minutes");
+		    	result.acrophase2.setText("            ("+(wave.getAcrophase()/60)+" hours)");
 		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
 		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
@@ -397,7 +395,8 @@ public class chartGenerator extends JInternalFrame {
     	JLabel period = new JLabel();
     	JLabel mesor = new JLabel();
     	JLabel amplitude = new JLabel();
-    	JLabel acrophase = new JLabel();
+    	JLabel acrophase1 = new JLabel();
+    	JLabel acrophase2 = new JLabel();
 		JLabel msr1 = new JLabel();
 		JLabel msr2 = new JLabel();
 		JFormattedTextField lower = lowerBound();
@@ -430,7 +429,8 @@ public class chartGenerator extends JInternalFrame {
 	    	add(period);
 	    	add(mesor);
 	    	add(amplitude);
-	    	add(acrophase);
+	    	add(acrophase1);
+	    	add(acrophase2);
 	    	add(msr1);
 	    	add(msr2);
     	}
