@@ -90,9 +90,6 @@ public class chartGenerator extends JInternalFrame {
         XYPlot plot = chart.getXYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
-        XYLineAndShapeRenderer renderer =
-            (XYLineAndShapeRenderer) plot.getRenderer();
-        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         return new ChartPanel(chart);
     }
     
@@ -118,7 +115,6 @@ public class chartGenerator extends JInternalFrame {
     		
     	}
     	outliers = new ArrayList<XYAnnotation>();
-    	Ellipse2D e = new Ellipse2D.Double(-50.0, -50.0, 100.0, 100.0);
     	int size = dates.size();
     	for(int i =0; i< size;i++){
             final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
