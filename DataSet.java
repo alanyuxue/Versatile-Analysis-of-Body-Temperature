@@ -1,4 +1,7 @@
 import java.util.*;
+
+import javax.swing.JOptionPane;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 
@@ -34,15 +37,14 @@ class DataSet
 				{
 					throw new Exception("Line does not have 2 components");
 				}
-				//try
-				{
-					times[i] = format.parse(parts[0]);
-				}
+				times[i] = format.parse(parts[0]);
 				values[i] = Double.parseDouble(parts[1]);
 			}
 			//Get sampling rate based off first 2 entries
 			rate = (int) ((times[1].getTime()-times[0].getTime())/(1000*60));
 			
+			if((N-1)*rate < 1440)
+				throw new Exception("Data does not span at least 24 hours");
 			int samplesperday=1440/rate;
 			startDate = times[0];
 			endDate = new Date(times[samplesperday*(Math.floorDiv(N, samplesperday))-1].getTime()+rate*60*1000);
