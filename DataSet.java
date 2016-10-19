@@ -32,7 +32,7 @@ class DataSet
 				String[] parts = lines.get(i+1).split(",");
 				if(parts.length != 2)
 				{
-					//Bad file
+					throw new Exception("Line does not have 2 components");
 				}
 				//try
 				{
