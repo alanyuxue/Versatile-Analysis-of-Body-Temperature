@@ -74,10 +74,6 @@ public class chartGenerator extends JInternalFrame {
         add(result,BorderLayout.EAST);
         pack();
         setVisible(true);
-        
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        setBounds(0, 0,dim.width,dim.height);
     }
     
     private ChartPanel createChart(DataSet dset) {
