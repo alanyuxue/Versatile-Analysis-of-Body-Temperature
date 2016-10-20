@@ -1,4 +1,3 @@
-package cits3200;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -95,8 +94,6 @@ public class chartGenerator extends JInternalFrame {
         plot.setRangePannable(true);
         XYLineAndShapeRenderer renderer =
             (XYLineAndShapeRenderer) plot.getRenderer();
-        renderer.setSeriesPaint(0,Color.black);
-        renderer.setSeriesPaint(1,Color.blue);
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         return new ChartPanel(chart);
     }
@@ -155,8 +152,8 @@ public class chartGenerator extends JInternalFrame {
             public void actionPerformed(ActionEvent e) {
             	final double r1 = chartPanel.getChart().getXYPlot().getRangeAxis().getLowerBound();
                 final double r2 = chartPanel.getChart().getXYPlot().getRangeAxis().getUpperBound();
-            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1-1);
-            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2+1);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1-5);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2+5);
             }
         });
         return auto;
@@ -168,8 +165,8 @@ public class chartGenerator extends JInternalFrame {
             public void actionPerformed(ActionEvent e) {
             	final double r1 = chartPanel.getChart().getXYPlot().getRangeAxis().getLowerBound();
                 final double r2 = chartPanel.getChart().getXYPlot().getRangeAxis().getUpperBound();
-            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1+1);
-            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2-1);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setLowerBound(r1+5);
+            	chartPanel.getChart().getXYPlot().getRangeAxis().setUpperBound(r2-5);
             }
         });
         return auto;
