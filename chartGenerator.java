@@ -9,8 +9,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Ellipse2D;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,8 +31,10 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYDrawableAnnotation;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -87,6 +92,9 @@ public class chartGenerator extends JInternalFrame {
         XYPlot plot = chart.getXYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
+        XYLineAndShapeRenderer renderer =
+            (XYLineAndShapeRenderer) plot.getRenderer();
+        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         return new ChartPanel(chart);
     }
     
@@ -112,6 +120,7 @@ public class chartGenerator extends JInternalFrame {
     		
     	}
     	outliers = new ArrayList<XYAnnotation>();
+    	Ellipse2D e = new Ellipse2D.Double(-50.0, -50.0, 100.0, 100.0);
     	int size = dates.size();
     	for(int i =0; i< size;i++){
             final CircleDrawer cd = new CircleDrawer(Color.red, new BasicStroke(1.0f), null);
@@ -326,21 +335,21 @@ public class chartGenerator extends JInternalFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				DecimalFormat df = new DecimalFormat(".##");
 				a = new Analyser(dset);
 				double p = a.getPeriod(a.dateToIndex(start),a.dateToIndex(end));
 		    	wave = a.doCosinor(p,a.dateToIndex(start),a.dateToIndex(end));
 				double MSR = a.getMSR(wave);
 				result.startDate.setText("Start: "+start.toString());
 				result.endDate.setText("End: "+end.toString());
-				result.out.setText("Outlier Tolerance: "+Double.toString(outlier));
+				result.out.setText("Outlier Tolerance: "+df.format(outlier));
 				result.rate.setText("Rate: "+ dset.rate+ " minutes between each sample");
-		    	result.period.setText("Period: "+ p+ " minutes ("+(p/60)+" hours)");
-		    	result.mesor.setText("MESOR: "+wave.getMESOR());
-		    	result.amplitude.setText("Amplitude: "+wave.getAmplitude());
-		    	result.acrophase1.setText("Acrophase: "+wave.getAcrophase()+" minutes");
-		    	result.acrophase2.setText("            ("+(wave.getAcrophase()/60)+" hours)");
-		    	result.msr1.setText("Mean Square Residual: "+MSR+"    ");
-		    	result.msr2.setText("        ("+(100*MSR/wave.getAmplitude())+"% of amplitude)");
+		    	result.period.setText("Period: "+ df.format(p)+ " minutes ("+df.format(p/60)+" hours)");
+		    	result.mesor.setText("MESOR: "+df.format(wave.getMESOR()));
+		    	result.amplitude.setText("Amplitude: "+df.format(wave.getAmplitude()));
+		    	result.acrophase.setText("Acrophase: "+df.format(wave.getAcrophase())+" minutes("+df.format(wave.getAcrophase()/60)+" hours)");
+		    	result.msr1.setText("Mean Square Residual: "+df.format(MSR)+"    ");
+		    	result.msr2.setText("        ("+df.format(100*MSR/wave.getAmplitude())+"% of amplitude)");
 		    	addData(a.fittedDates(start,end),a.fittedValues(start,end,wave));
 		    	a.getOutliers(a.dateToIndex(start),a.dateToIndex(end), wave, outlier);
 		    	ArrayList<Date> dates = a.outlierDates();
@@ -395,8 +404,7 @@ public class chartGenerator extends JInternalFrame {
     	JLabel period = new JLabel();
     	JLabel mesor = new JLabel();
     	JLabel amplitude = new JLabel();
-    	JLabel acrophase1 = new JLabel();
-    	JLabel acrophase2 = new JLabel();
+    	JLabel acrophase = new JLabel();
 		JLabel msr1 = new JLabel();
 		JLabel msr2 = new JLabel();
 		JFormattedTextField lower = lowerBound();
@@ -429,8 +437,7 @@ public class chartGenerator extends JInternalFrame {
 	    	add(period);
 	    	add(mesor);
 	    	add(amplitude);
-	    	add(acrophase1);
-	    	add(acrophase2);
+	    	add(acrophase);
 	    	add(msr1);
 	    	add(msr2);
     	}
