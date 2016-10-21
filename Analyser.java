@@ -7,6 +7,7 @@ class Analyser
 	public DataSet dset;
 	public ArrayList<Integer> outliers;
 	public double outlierSense = 2.0;
+	public double[] periodogram;
 	
 	public Analyser(DataSet ds)
 	{
@@ -37,7 +38,7 @@ class Analyser
 				}
 			}
 		}
-
+		periodogram = Arrays.copyOf(result, N);
 		return ((N)/maxid)*dset.rate;
 	}
 	
@@ -136,15 +137,22 @@ class Analyser
 		ArrayList<String> str = new ArrayList<String>();
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		str.add("Results for "+dset.name);
-		str.add("From "+format.format(s)+" to "+format.format(e));
-		str.add("Period: "+wave.getPeriod()+" minutes ("+(wave.getPeriod()/60)+" hours)");
-		str.add("MESOR: "+wave.getMESOR());
-		str.add("Amplitude: "+wave.getAmplitude());
-		str.add("Acrophase: "+wave.getAcrophase()+" minutes ("+(wave.getAcrophase()/60)+" hours)");
+		str.add("Start Date,"+format.format(s));
+		str.add("End Date,"+format.format(e));
+		str.add("Period (hours),"+(wave.getPeriod()/60));
+		str.add("MESOR,"+wave.getMESOR());
+		str.add("Amplitude,"+wave.getAmplitude());
+		str.add("Acrophase (hours),"+(wave.getAcrophase()/60));
 		ArrayList<String> outliers = outlierRanges(dateToIndex(s),dateToIndex(e),wave,2);
 		str.add("Outliers: (Tolerance = "+outlierSense+"): ");
 		for(String c : outliers)
 			str.add(c);
+		str.add("Periodogram");
+		str.add("period (minutes),value");
+		for(int i=1; i<periodogram.length; i++)
+		{
+			str.add((double)((periodogram.length)/i)*dset.rate+","+periodogram[i]);
+		}
 		return str;
 	}
 	
@@ -152,14 +160,14 @@ class Analyser
 	{
 		try
 		{
-			PrintWriter writer = new PrintWriter(dset.path+" - REPORT.txt", "UTF-8");
+			PrintWriter writer = new PrintWriter(dset.path+" - REPORT.csv", "UTF-8");
 			ArrayList<String> lines = reportStrings(s,e,wave);
 			for(String str : lines)
 			{
 				writer.println(str);
 			}
 			writer.close();
-			return dset.path+" - REPORT.txt";
+			return dset.path+" - REPORT.csv";
 		}
 		catch(Exception exc)
 		{
