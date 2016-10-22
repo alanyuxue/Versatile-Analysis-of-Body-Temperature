@@ -1,4 +1,3 @@
-package cits3200;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,7 +13,6 @@ import java.awt.geom.Ellipse2D;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,9 +52,9 @@ public class chartGenerator extends JInternalFrame {
     public Date start, end;
     double outlier = 2.0;
     ArrayList<XYAnnotation> outliers = new ArrayList<XYAnnotation>();
-    
+
     public chartGenerator(DataSet ds) {
-    	super("Temperature Analysis #" + (++openChartCount), 
+    	super("Temperature Analysis #" + (++openChartCount),
     			true, 	//resizable
     			true,	//closable
     			true,	//maximisable
@@ -64,7 +62,7 @@ public class chartGenerator extends JInternalFrame {
     	dset = ds;
     	start = dset.startDate;
     	end = dset.endDate;
-    	
+
     	chartPanel = createChart(dset);
     	chartPanel.getChart().getXYPlot().setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
     	setLayout(new BorderLayout(0, 5));
@@ -72,24 +70,24 @@ public class chartGenerator extends JInternalFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(createZoomOut());
         panel.add(createZoomIn());
-        
+
         add(panel, BorderLayout.SOUTH);
         add(result,BorderLayout.EAST);
         pack();
         setVisible(true);
         setLocation(xOffset*openChartCount,yOffset*openChartCount);
     }
-    
+
     private ChartPanel createChart(DataSet dset) {
         roiData = createDataset(dset);
-        
+
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-        		"Temperature Analysis #" + openChartCount, 
-        		"Date", 
-        		"Temperature", 
-        		roiData, 
+        		"Temperature Analysis #" + openChartCount,
+        		"Date",
+        		"Temperature",
+        		roiData,
         		true, true, false);
-        
+
         XYPlot plot = chart.getXYPlot();
         plot.setDomainPannable(true);
         plot.setRangePannable(true);
@@ -100,7 +98,7 @@ public class chartGenerator extends JInternalFrame {
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         return new ChartPanel(chart);
     }
-    
+
     private void addData(ArrayList<Date> dates ,ArrayList<Double> values){
     	if (roiData.indexOf(analysis) != -1){
     		roiData.removeSeries(analysis);
@@ -110,7 +108,7 @@ public class chartGenerator extends JInternalFrame {
     	for(int i = 0;i<length;i++){
     		analysis.addOrUpdate(new Minute(dates.get(i)),values.get(i));
     	}
-    	
+
     	roiData.addSeries(analysis);
     }
 
@@ -120,7 +118,7 @@ public class chartGenerator extends JInternalFrame {
     		for(int i =0; i <size;i++){
     			chartPanel.getChart().getXYPlot().removeAnnotation(outliers.get(i));
     		}
-    		
+
     	}
     	outliers = new ArrayList<XYAnnotation>();
     	Ellipse2D e = new Ellipse2D.Double(-50.0, -50.0, 100.0, 100.0);
@@ -134,7 +132,7 @@ public class chartGenerator extends JInternalFrame {
     		chartPanel.getChart().getXYPlot().addAnnotation(outliersAnnotation);
     	}
     }
-    
+
     private static TimeSeriesCollection createDataset(DataSet dset){
 	     final TimeSeries series = new TimeSeries(dset.name);
 		 double d;
@@ -148,7 +146,7 @@ public class chartGenerator extends JInternalFrame {
 	     dataset.addSeries(series);
 	     return dataset;
 	     }
-    
+
     private JButton createZoomOut() {
         final JButton auto = new JButton(new AbstractAction("Zoom Out") {
             @Override
@@ -161,7 +159,7 @@ public class chartGenerator extends JInternalFrame {
         });
         return auto;
     }
-    
+
     private JButton createZoomIn() {
         final JButton auto = new JButton(new AbstractAction("Zoom In") {
             @Override
@@ -174,7 +172,7 @@ public class chartGenerator extends JInternalFrame {
         });
         return auto;
     }
-    
+
 	private JFormattedTextField lowerBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     	JFormattedTextField lowerBound = new JFormattedTextField(df);
@@ -185,18 +183,18 @@ public class chartGenerator extends JInternalFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	         (c == KeyEvent.VK_BACK_SPACE) ||
-    	         (c == KeyEvent.VK_DELETE) || 
-    	         (c == KeyEvent.VK_ENTER) || 
-    	         (c == KeyEvent.VK_SLASH) || 
-    	         (c == KeyEvent.VK_SPACE) || 
-    	         (c == ':')))        
+    	         (c == KeyEvent.VK_DELETE) ||
+    	         (c == KeyEvent.VK_ENTER) ||
+    	         (c == KeyEvent.VK_SLASH) ||
+    	         (c == KeyEvent.VK_SPACE) ||
+    	         (c == ':')))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
     	        e.consume();
     	      }
     	    }
     	  });
-    	
+
         lowerBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -215,7 +213,7 @@ public class chartGenerator extends JInternalFrame {
             	else JOptionPane.showMessageDialog(null, "Lower Bound is outside date range");
             }
         });
-        
+
         lowerBound.addFocusListener(new FocusListener(){
 	        @Override
 	        public void focusGained(FocusEvent e){
@@ -229,7 +227,7 @@ public class chartGenerator extends JInternalFrame {
 	    });
         return lowerBound;
     }
-    
+
 	private JFormattedTextField upperBound() {
     	DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
     	JFormattedTextField upperBound = new JFormattedTextField(df);
@@ -240,8 +238,8 @@ public class chartGenerator extends JInternalFrame {
     	      char c = e.getKeyChar();
     	      if (!((c >= '0') && (c <= '9') ||
     	    		  (c == KeyEvent.VK_BACK_SPACE) ||
-    	    	         (c == KeyEvent.VK_DELETE) || 
-    	    	         (c == KeyEvent.VK_ENTER) || 
+    	    	         (c == KeyEvent.VK_DELETE) ||
+    	    	         (c == KeyEvent.VK_ENTER) ||
     	    	         (c == KeyEvent.VK_SLASH)))
     	      {
     	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
@@ -249,17 +247,17 @@ public class chartGenerator extends JInternalFrame {
     	      }
     	    }
     	  });
-    	
+
     	upperBound.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
 
             	try {
 					end = df.parse(upperBound.getText());
-					
+
 				} catch (ParseException e1) {
 					e1.printStackTrace();
-				}            	
+				}
             	if(end.after(dset.startDate) && end.before(dset.endDate)){
             		if (end.after(start)) {
             			chartPanel.getChart().getXYPlot().getDomainAxis().setRange((double) start.getTime(),(double) end.getTime());
@@ -270,7 +268,7 @@ public class chartGenerator extends JInternalFrame {
             	else JOptionPane.showMessageDialog(null, "Upper Bound is outside date range");
             }
         });
-    	
+
     	upperBound.addFocusListener(new FocusListener(){
 	        @Override
 	        public void focusGained(FocusEvent e){
@@ -284,19 +282,19 @@ public class chartGenerator extends JInternalFrame {
 	    });
         return upperBound;
     }
-    
+
 	private JTextField outlierTextField() {
 		JTextField outlierTextField = new JTextField();
 		outlierTextField.setMaximumSize(new Dimension(300,30));
 		outlierTextField.setText("2.0");
-		
+
 		outlierTextField.addKeyListener(new KeyAdapter() {
     	    public void keyTyped(KeyEvent e) {
       	      char c = e.getKeyChar();
       	      if (!((c >= '0') && (c <= '9') ||
       	    		  (c == KeyEvent.VK_BACK_SPACE) ||
-      	    	         (c == KeyEvent.VK_DELETE) || 
-      	    	         (c == KeyEvent.VK_ENTER) || 
+      	    	         (c == KeyEvent.VK_DELETE) ||
+      	    	         (c == KeyEvent.VK_ENTER) ||
       	    	         (c == KeyEvent.VK_PERIOD)))
       	      {
       	        JOptionPane.showMessageDialog(null, "Please Enter Valid");
@@ -304,20 +302,20 @@ public class chartGenerator extends JInternalFrame {
       	      }
       	    }
       	  });
-		
+
 		outlierTextField.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					outlier = Double.parseDouble(outlierTextField.getText());
-					
+
 				} catch (NumberFormatException e1) {
 					JOptionPane.showMessageDialog(null, "Please enter a double number");
 				}
 			}
 		});
-		
+
 		outlierTextField.addFocusListener(new FocusListener(){
 	        @Override
 	        public void focusGained(FocusEvent e){
@@ -329,13 +327,13 @@ public class chartGenerator extends JInternalFrame {
 				outlierTextField.setText(Double.toString(outlier));
 			}
 	    });
-		
+
 		return outlierTextField;
 	}
-	
+
     private JButton analyse() {
     	JButton analyse = new JButton(new AbstractAction("Analyse") {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				DecimalFormat df = new DecimalFormat(".##");
@@ -358,23 +356,23 @@ public class chartGenerator extends JInternalFrame {
 		    	ArrayList<Date> dates = a.outlierDates();
 				ArrayList<Double> values = a.outlierValues();
 				addOutliers(dates,values);
-				
+
 			}
 		});
     	return analyse;
     }
-    
+
     private void removeOutliers(){
     	int size = outliers.size();
     	for(int i = 0;i<size;i++){
     		chartPanel.getChart().getXYPlot().removeAnnotation(outliers.get(i));
     	}
-			
+
     }
-    
+
 	private JButton produceReport() {
 		JButton produceReport = new JButton(new AbstractAction("Produce Report") {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(a!=null)
@@ -389,17 +387,17 @@ public class chartGenerator extends JInternalFrame {
 				{
 					JOptionPane.showMessageDialog(null, "Run analysis before creating report");
 				}
-				
+
 			}
 		});
-		
+
 		return produceReport;
 	}
-	
-	
-	
+
+
+
     private class ResultPanel extends JPanel{
-    	
+
     	JLabel startDate = new JLabel();
     	JLabel endDate = new JLabel();
     	JLabel out = new JLabel();
@@ -413,14 +411,14 @@ public class chartGenerator extends JInternalFrame {
 		JFormattedTextField lower = lowerBound();
         JFormattedTextField upper = upperBound();
         JTextField outlierText = outlierTextField();
-		
+
     	private ResultPanel() {
         	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        	
+
         	JLabel lowerLabel = new JLabel("Start Date and Time (dd/mm/yyyy hh:mm):");
             JLabel upperLabel = new JLabel("End Date (dd/mm/yyyy):");
             JLabel outlierLabel = new JLabel("Outlier Tolerance:");
-            
+
             add(lowerLabel);
             add(lower);
             add(upperLabel);
@@ -430,7 +428,7 @@ public class chartGenerator extends JInternalFrame {
             add(analyse());
             add(produceReport());
             add(reset());
-            
+
         	JLabel title = new JLabel("Results:");
         	add(title);
         	add(startDate);
@@ -444,11 +442,11 @@ public class chartGenerator extends JInternalFrame {
 	    	add(msr1);
 	    	add(msr2);
     	}
-    	
-    	
+
+
     	private JButton reset() {
     		JButton reset = new JButton(new AbstractAction("Reset") {
-    			
+
     			@Override
     			public void actionPerformed(ActionEvent e) {
     				start = dset.startDate;

@@ -1,5 +1,4 @@
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
@@ -44,7 +43,7 @@ public class Window extends JFrame implements ActionListener
         //Make dragging a little faster but perhaps uglier.
         desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
     }
-  
+
     protected JMenuBar createMenuBar() {
 
         JMenuBar menuBar = new JMenuBar();
@@ -98,17 +97,17 @@ public class Window extends JFrame implements ActionListener
     }
 
     public void processFile(File file){
-  	
+
     	//process data
 		try
 		{
 			DataSet dset = new DataSet(file);
 			//create chart
 			chartGenerator chart = new chartGenerator(dset);
-	
+
 			chart.setVisible(true);
 	        desktop.add(chart);
-	        
+
 	        //always put new chart on top of others
 	        try {
 	            chart.setSelected(true);
@@ -118,7 +117,7 @@ public class Window extends JFrame implements ActionListener
 		{
 			JOptionPane.showMessageDialog(null, "Failed to read. File may not be formatted correctly");
 		}
-		
+
 	}
 
     //Quit the application.

@@ -1,7 +1,4 @@
 import java.util.*;
-
-import javax.swing.JOptionPane;
-
 import java.io.*;
 import java.text.SimpleDateFormat;
 
@@ -15,7 +12,7 @@ class DataSet
 	public double[] values;
 	public Date startDate;
 	public Date endDate;
-	
+
 	public DataSet(File datafile) throws Exception
 	{
 		{
@@ -42,7 +39,7 @@ class DataSet
 			}
 			//Get sampling rate based off first 2 entries
 			rate = (int) ((times[1].getTime()-times[0].getTime())/(1000*60));
-			
+
 			if((N-1)*rate < 1440)
 				throw new Exception("Data does not span at least 24 hours");
 			int samplesperday=1440/rate;
