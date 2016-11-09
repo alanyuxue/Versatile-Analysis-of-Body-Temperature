@@ -1,81 +1,55 @@
 # Versatile Analysis of Body Temperature
 
-## General Goals
+## Description
 
-The main goal of the project is to produce a system which can process the data obtained from temperature sensors placed in a variety of animals. These data logging sensors are left in the body for relatively long periods of time (from a few days to a few years) and record the temperature of the animal every few minutes. The data produced generally follows a sinusoidal trend with a period of one day. The team aims to produce software which can fit a curve to this sinusoid and produce a report using cosinor analysis. This allows the research team to understand more about the connection of body temperature fluctuations with the health and wellbeing of an animal. The research seems to suggest that body temperature fluctuations can reliably indicate how well the animal will grow and how fit and strong it is likely to be. Beyond that the software must also provide a way to show when outliers are present as this is a strong indicator of the animal being ill, mistreated or under a range other stressors. This is so significant as many of the current methods for measuring stress levels are not as reliable as this.
+This project is an application designed to read, analyse and summaries timeseries data from temperature loggers placed in a variety of animals for an extended period of time. The software runs a periodogram and cosinor fit on a selected subset of the data producing a report detailing the relevant periods, MESOR, amplitude, acrophase, Mean Square Residual and Outliers. This analysis is useful for analysing the health of the animals being measured giving indications of changes in their wellbeing.   
 
-## Current System
+This software was created by Viktor Fidanovski, Xue Yu, Alex Emery and Lewis Tolonen for clients Dominique Blache and Shane Maloney.   
 
-The current system employed by the research group involves manually importing the data, from the Comma Separated Values (CSV) files produced by the data loggers, into Excel. From there the researchers use a macro to run a periodogram analysis which allows for a further cosinor analysis. This system is modular and allows for virtually any calculation to be done on the data. However, using Excel to manually complete this is time consuming and often prone to errors as each formula must manually be modified each time. This means that although the analysis is modular, changing the parameters of each iteration (such as the time) is nearly impossible. Moreover, the lack of repeatability means that any unexpected results require a recheck of the Excel formulas rather than looking for potential biological factors. The proposed system should address these problems.
+## Source Directory
 
-## Proposed System
+All java source files needed for compilation are included in the code directory including the JFreeChart library which is included in
+the "Libraries" folder.   
+Note: This project uses (within the permissions of the MIT License) the Fast Fourier Transform implementation created for Project Nayuki
+(https://www.nayuki.io/page/free-small-fft-in-multiple-languages). See FFT.java
 
-### Overview
+## Build
 
-The system the team aims to produce will consist of two main components, the back end analysis functionality and the front end graphical user interface (GUI). The proposed system is based around an interface that allows for easy modification and viewing of the data and analysis. Specifically, the team aims to use a package such as JFreeChart to present the data and then work with Java’s built in libraries to open windows and develop a simple series of menus to control the analysis.   
+Using Eclipse or similar IDE:   
+1. Import all the source code.   
+2. Link project to require libraries in Libraries folder.   
+3. Export as Runnable Jar file, selecting window.java as the location of main class and including the libraries in that jar.   
 
-The GUI system, however, relies on the backend analysis code, which runs through a series of steps. Firstly, a periodogram or Fast Fourier Transform analysis is run on the data to find the period of the curve. Using that data and the selected analysis area the cosinor analysis is done using a least squares regression and a report produced. This can then be displayed graphically via the GUI. On top of that analysis the program will be able to identify where outliers exist in the data and indicate that to the user. The analysis can then be changed and run again or more files could be imported to do further analysis on them. This means that the system is expected to be able to work with multiple files.   
+## Install
 
-All in all, the program will take the inputted file (or files) in either CSV or text format, plot whatever analysis is selected and produce a report detailing the specifics of the analysis.
+There is no install process, once the project is exported as a runnable jar it can be run and opened without anything further.   
 
-### Functional Requirements
+## Running
 
-* Reading CSV or Text Data Files   
-The system must be able to open and read CSV or Text files generated by data loggers stored on the hard­drive of the computer on which the program is being run.
+1. Double click created .jar file (or use provided "VABT.jar").   
+2. Select "file" in top left corner and then "open" from those options.   
+3. Navigate to and select an appropriately formatted csv file to load into the program and hit open.   
+4. After waiting a few seconds the graph will appear of that data. Refer to "Instructions" on how to navigate in more detail.   
+5. Enter start and end dates for the analysis (making sure to hit enter after entering anything into a box) and press the analyse button.   
+6. Modify the outlier tolerance if required.   
+7. Save the results of the analysis to "NAME_OF_DATASET - RESULTS.csv"   
+8. Press reset to do another analysis or another file can be opened on top of the present file.   
 
-* Window Selection   
-The user must be able to select a range of days on which the data analysis should be run. The system will provide a mouse based slider for both the start point and the end point.
+## User Documentation
 
-* Period Calculation   
-The system must be able to calculate an accurate evaluation of the periodicity of the data provided – the time taken for the data to go through a complete oscillation from maximum to minimum and back again.
+### Periodogram  
 
-* Cosinor Fit   
-The system must determine the equation of a cosine curve (Y(t)=M+A*cos(2π/𝜏*t+φ)) that matches the data as closely as possible. Given the period (𝜏), the MESOR (M), acrophase (φ) and amplitude (A) must be determined. The fitted curve should minimise the sum of the square of the residuals.
+When the Analyse button is pressed the system first performs a Periodogram on the data in the selected window. This is implemented through a Fast Fourier Transform, getting the relative prevalence of different frequencies in the data. These frequencies are then converted to periods and the most significant is used for the analysis.   
 
-* Correlation Coefficient   
-The system must report the correlation coefficient 0 ≤ r ≤ 1 based on how well the fitted cosine curve fits the data with 0 representing no correlation and 1 representing a perfect match.
+### Cosinor Analysis   
 
-* Find Outliers   
-The system must locate points of the data that significantly deviate from the fitted cosine curve and determine the extent of the deviation.
+When the Analyse button is pressed, after performing the Periodogram a Cosinor fit is run on the data which involves fitting a cosine curve of the calculated period to the data. This involves solving a system of equations to calculate the MESOR, Amplitude and Phase that minimises the sum of the square of the residuals between the fitted values and the actual values.   
 
-* Report Generation   
-The system must output a human readable file detailing the results of the analysis – period, cosinor, correlation coefficient and outliers. The user must be able to select the location to which this file is saved.
+### Outlier   
 
-* Data Plotting   
-The system must generate a plot of both the initial data and the fitted curve. The user should have control over how the plot appears – colour and scale.
+Outliers are calculated using the amplitude of the Cosinor fit and the current fit value. The Outlier Tolerance box defines how many multiples of the amplitude away from the current fit value the data point must be to be classified as an outlier. In other words:   
+Outlier Threshold = Current Fit Value ± Outlier Tolerance * Amplitude of Fit   
 
-* Periodogram Plotting   
-The system should be able to produce a plot of the periodogram of the data – a line graph representing the prevalence of a series of frequencies on the data.
+### Mean Squares Residual   
 
-* Analysing Multiple Files   
-The user should be able to select multiple CSV files and have the system run the analysis on all selected data sets and produce reports for each.
-
-### Non­functional Requirements
-
-#### User Interface and Human Factors
-
-The users of the system will be researchers and students. Expertise in the use of analysis software is not assumed, however familiarity with the use of simple computer programs and computer file systems is. To minimise the need for training, the system must be simple to learn with an intuitive mouse based user interface. All information needed to use the interface should be available in the system’s documentation. It is also assumed that the user is capable of retrieving the files from the data loggers which provide another source of input. Since the expected users will have some experience and scientific knowledge about the analysis that they are doing, the system will not try and shield the user too much from making errors. This is mainly due to not wanting to block certain relevant functionality that the team does not understand. That being said obvious errors, such as choosing dates that do not exist in the data, will not be permitted.
-
-#### Documentation
-
-The documentation of the system should be divided into two sections: installation and use. The installation documentation should instruct the user on how to setup the software and describe any needed external libraries and system requirements. This section is targeted at those responsible for the initial setup of the software and does not assume this person is familiar with the software’s use. The use section should detail the features of the user interface and describe how a user should go about performing a desired action. This section is targeted at the end users ­ researchers and students. The documentation must be produced so that virtually anyone with a basic understanding of computers could operate the software. This means that it must also cover all the different platforms that the program will run on.
-
-#### Hardware Consideration
-
-The system is required to run primarily on Mac personal computers but should also be able to run on Windows and Linux based operating systems. Hard­drive space is unlikely to cause issue as the report files generated by the program will require very little memory and it is assumed the input data is already stored on the hard­drive. At least a few megabytes of RAM will be needed to process any data, as the intended use may involve files on the order of 100,000 data points. The system will require the use of a mouse or trackpad and a keyboard.
-
-#### Performance Characteristics
-
-Data provided to the system may be taken from a range of over a year at intervals as fine as every 5 minutes, giving a large amount of data to be processed. The time taken to analyse one file should scale at a rate proportional to no more than the square of the number of data points (O(n2   )), although ideally it should scale proportionally to the number of data points times the logarithm of the number of points (O(nlog(n)). The total time taken will scale linearly with the number of files being analysed. On one average sized data set (around 100,000 points) the analysis should take less than 5 minutes.
-
-#### Error Handling and Extreme Conditions
-
-The system should check whether the inputted file is either a CSV or text file and whether it is formatted correctly. If either of these checks fail, then the system will inform the user. This is to prevent the system from crashing or producing incorrect results. If the user tries to perform an invalid operation, such as selecting a date out of the data range, the system needs to report the invalid operation to the user. Reporting errors such as these is crucial in ensuring the reliability of the results produced by the program.
-
-In extreme conditions, such as attempting to process a large number of CSV files, the system should provide updates on its process to inform the user that the system is indeed working and hasn’t in fact frozen.
-
-Beyond just warning the user of errors and handling extreme conditions the code itself will have built in error testing code such as unit tests. These can be used to prove that each unit of the code works as desired and can be tested to ensure proper functioning.
-
-#### System Interfacing
-
-No inputs are coming from outside the proposed system and no outputs are going outside the proposed system. The input format medium is restricted to CSV files or text files, which are formatted in a fixed manner to allow for accurate processing. The output must be a user readable file preferably Excel.
+After fitting the curve the Mean Square Residual (MSR) is calculated. This is simply the average of the square of the difference between the fitted value and actual value in the range of the analysis.   
