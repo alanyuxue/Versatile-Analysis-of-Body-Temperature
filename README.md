@@ -38,18 +38,15 @@ There is no install process, once the project is exported as a runnable jar it c
 ## User Documentation
 
 ### Periodogram  
+When the Analyse button is pressed the system first performs a Periodogram on the data in the selected window. This is implemented through a Fast Fourier Transform, getting the relative prevalence of different frequencies in the data. These frequencies are then converted to periods and the most significant is used for the analysis.   
+### Cosinor Analysis   
+When the Analyse button is pressed, after performing the Periodogram a Cosinor fit is run on the data which involves fitting a cosine curve of the calculated period to the data. This involves solving a system of equations to calculate the MESOR, Amplitude and Phase that minimises the sum of the square of the residuals between the fitted values and the actual values.   
+### Outlier   
+Outliers are calculated using the amplitude of the Cosinor fit and the current fit value. The Outlier Tolerance box defines how many multiples of the amplitude away from the current fit value the data point must be to be classified as an outlier. In other words:   Outlier Threshold = Current Fit Value ± Outlier Tolerance * Amplitude of Fit   
+### Mean Squares Residual   
+After fitting the curve the Mean Square Residual (MSR) is calculated. This is simply the average of the square of the difference between the fitted value and actual value in the range of the analysis.   
 
-When the Analyse button is pressed the system first performs a Periodogram on the data in the selected window. This is implemented through a Fast Fourier Transform, getting the relative prevalence of different frequencies in the data. These frequencies are then converted to periods and the most significant is used for the analysis.   
 
-### Cosinor Analysis   
+## License
 
-When the Analyse button is pressed, after performing the Periodogram a Cosinor fit is run on the data which involves fitting a cosine curve of the calculated period to the data. This involves solving a system of equations to calculate the MESOR, Amplitude and Phase that minimises the sum of the square of the residuals between the fitted values and the actual values.   
-
-### Outlier   
-
-Outliers are calculated using the amplitude of the Cosinor fit and the current fit value. The Outlier Tolerance box defines how many multiples of the amplitude away from the current fit value the data point must be to be classified as an outlier. In other words:   
-Outlier Threshold = Current Fit Value ± Outlier Tolerance * Amplitude of Fit   
-
-### Mean Squares Residual   
-
-After fitting the curve the Mean Square Residual (MSR) is calculated. This is simply the average of the square of the difference between the fitted value and actual value in the range of the analysis.   
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.   
